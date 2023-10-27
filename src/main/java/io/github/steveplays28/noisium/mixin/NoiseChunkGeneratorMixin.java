@@ -287,8 +287,12 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 			chunkNoiseSampler.sampleEndDensity(o);
 
 			for (int p = 0; p < m; ++p) {
-				int topMostVerticalChunkSectionIndex = chunk.countVerticalSections() - 1;
-				ChunkSection topMostVerticalChunkSection = chunk.getSection(topMostVerticalChunkSectionIndex);
+				int nextChunkSectionIndex = chunk.countVerticalSections() - 1;
+				ChunkSection chunkSection = chunk.getSection(nextChunkSectionIndex);
+
+				// TODO: Multithread here
+				// The vertical chunk sections can be looped over using multithreading here
+				// All the required variables can be passed into the CompletableFuture
 
 				for (int r = cellHeight - 1; r >= 0; --r) {
 					chunkNoiseSampler.onSampledCellCorners(r, p);
@@ -298,9 +302,9 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 						int chunkSectionBlockPosY = blockPosY & 0xF;
 						int chunkSectionIndex = chunk.getSectionIndex(blockPosY);
 
-						if (topMostVerticalChunkSectionIndex != chunkSectionIndex) {
-							topMostVerticalChunkSectionIndex = chunkSectionIndex;
-							topMostVerticalChunkSection = chunk.getSection(chunkSectionIndex);
+						if (nextChunkSectionIndex != chunkSectionIndex) {
+							nextChunkSectionIndex = chunkSectionIndex;
+							chunkSection = chunk.getSection(chunkSectionIndex);
 						}
 
 						double deltaY = (double) s / verticalCellBlockCount;
@@ -329,7 +333,7 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 									continue;
 								}
 
-								topMostVerticalChunkSection.setBlockState(
+								chunkSection.setBlockState(
 										chunkSectionBlockPosX, chunkSectionBlockPosY, chunkSectionBlockPosZ, blockState, false);
 
 								heightmap.trackUpdate(chunkSectionBlockPosX, blockPosY, chunkSectionBlockPosZ, blockState);
