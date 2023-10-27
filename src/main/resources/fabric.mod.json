@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "noisium",
+  "version": "${version}",
+  "name": "Noisium",
+  "description": "",
+  "authors": [
+    "Steveplays28"
+  ],
+  "contact": {
+    "repo": "https://github.com/Steveplays28/noisium"
+  },
+  "license": "LGPL-3.0",
+  "icon": "assets/noisium/icon.png",
+  "environment": "*",
+  "accessWidener" : "noisium.accesswidener",
+  "entrypoints": {
+    "main": [
+      "io.github.steveplays28.noisium.Noisium"
+    ]
+  },
+  "mixins": [
+    "noisium.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}

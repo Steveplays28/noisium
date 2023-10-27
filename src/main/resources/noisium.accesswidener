@@ -1,0 +1,13 @@
+accessWidener v2 named
+
+accessible field net/minecraft/world/chunk/ChunkSection blockStateContainer Lnet/minecraft/world/chunk/PalettedContainer;
+accessible method net/minecraft/world/gen/chunk/NoiseChunkGenerator createChunkNoiseSampler (Lnet/minecraft/world/chunk/Chunk;Lnet/minecraft/world/gen/StructureAccessor;Lnet/minecraft/world/gen/chunk/Blender;Lnet/minecraft/world/gen/noise/NoiseConfig;)Lnet/minecraft/world/gen/chunk/ChunkNoiseSampler;
+accessible method net/minecraft/world/gen/chunk/ChunkNoiseSampler getHorizontalCellBlockCount ()I
+accessible method net/minecraft/world/gen/chunk/ChunkNoiseSampler getVerticalCellBlockCount ()I
+accessible field net/minecraft/world/gen/chunk/NoiseChunkGenerator settings Lnet/minecraft/registry/entry/RegistryEntry;
+accessible method net/minecraft/world/gen/chunk/ChunkNoiseSampler sampleBlockState ()Lnet/minecraft/block/BlockState;
+accessible method net/minecraft/world/gen/chunk/NoiseChunkGenerator getBlockState (Lnet/minecraft/world/gen/chunk/ChunkNoiseSampler;IIILnet/minecraft/block/BlockState;)Lnet/minecraft/block/BlockState;
+accessible field net/minecraft/world/gen/chunk/NoiseChunkGenerator AIR Lnet/minecraft/block/BlockState;
+accessible field net/minecraft/world/chunk/PalettedContainer paletteProvider Lnet/minecraft/world/chunk/PalettedContainer$PaletteProvider;
+accessible field net/minecraft/world/chunk/PalettedContainer data Lnet/minecraft/world/chunk/PalettedContainer$Data;
+accessible field net/minecraft/world/chunk/PalettedContainer$Data palette Lnet/minecraft/world/chunk/Palette;
