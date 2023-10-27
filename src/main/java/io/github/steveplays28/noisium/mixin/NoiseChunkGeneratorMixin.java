@@ -1,9 +1,13 @@
 package io.github.steveplays28.noisium.mixin;
 
+import com.google.common.collect.Sets;
 import net.minecraft.SharedConstants;
 import net.minecraft.block.BlockState;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.chunk.Chunk;
@@ -11,14 +15,23 @@ import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.gen.StructureAccessor;
 import net.minecraft.world.gen.chunk.*;
 import net.minecraft.world.gen.noise.NoiseConfig;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.stream.IntStream;
 
 @Mixin(NoiseChunkGenerator.class)
 public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
+	@Shadow
+	@Final
+	private RegistryEntry<ChunkGeneratorSettings> settings;
+
 	public NoiseChunkGeneratorMixin(BiomeSource biomeSource) {
 		super(biomeSource);
 	}
@@ -277,8 +290,8 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 			chunkNoiseSampler.sampleEndDensity(o);
 
 			for (int p = 0; p < m; ++p) {
-				int chunkVerticalSectionsMinusOne = chunk.countVerticalSections() - 1;
-				ChunkSection chunkSection = chunk.getSection(chunkVerticalSectionsMinusOne);
+				int topMostVerticalChunkSectionIndex = chunk.countVerticalSections() - 1;
+				ChunkSection topMostVerticalChunkSection = chunk.getSection(topMostVerticalChunkSectionIndex);
 
 				for (int r = cellHeight - 1; r >= 0; --r) {
 					chunkNoiseSampler.onSampledCellCorners(r, p);
@@ -288,24 +301,26 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 						int chunkSectionBlockPosY = blockPosY & 0xF;
 						int chunkSectionIndex = chunk.getSectionIndex(blockPosY);
 
-						if (chunkVerticalSectionsMinusOne != chunkSectionIndex) {
-							chunkVerticalSectionsMinusOne = chunkSectionIndex;
-							chunkSection = chunk.getSection(chunkSectionIndex);
+						if (topMostVerticalChunkSectionIndex != chunkSectionIndex) {
+							topMostVerticalChunkSectionIndex = chunkSectionIndex;
+							topMostVerticalChunkSection = chunk.getSection(chunkSectionIndex);
 						}
 
-						double d = (double) s / verticalCellBlockCount;
-						chunkNoiseSampler.interpolateY(blockPosY, d);
+						double deltaY = (double) s / verticalCellBlockCount;
+						chunkNoiseSampler.interpolateY(blockPosY, deltaY);
 
 						for (int w = 0; w < horizontalCellBlockCount; ++w) {
 							int blockPosX = chunkPosStartX + o * horizontalCellBlockCount + w;
 							int chunkSectionBlockPosX = blockPosX & 0xF;
 							double deltaX = (double) w / horizontalCellBlockCount;
+
 							chunkNoiseSampler.interpolateX(blockPosX, deltaX);
 
 							for (int z = 0; z < horizontalCellBlockCount; ++z) {
 								int blockPosZ = chunkPosStartZ + p * horizontalCellBlockCount + z;
 								int chunkSectionBlockPosZ = blockPosZ & 0xF;
 								double deltaZ = (double) z / horizontalCellBlockCount;
+
 								chunkNoiseSampler.interpolateZ(blockPosZ, deltaZ);
 								BlockState blockState = chunkNoiseSampler.sampleBlockState();
 
@@ -317,7 +332,7 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 									continue;
 								}
 
-								chunkSection.setBlockState(
+								topMostVerticalChunkSection.setBlockState(
 										chunkSectionBlockPosX, chunkSectionBlockPosY, chunkSectionBlockPosZ, blockState, false);
 
 								heightmap.trackUpdate(chunkSectionBlockPosX, blockPosY, chunkSectionBlockPosZ, blockState);
@@ -343,11 +358,40 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 	}
 
 	/**
-	 * @author
-	 * @reason
+	 * @author Steveplays28
+	 * @reason Micro-optimisation
 	 */
 	@Overwrite
-	public CompletableFuture<Chunk> populateNoise(Executor executor, Blender blender, NoiseConfig noiseConfig, StructureAccessor structureAccessor, Chunk chunk2) {
+	@SuppressWarnings("ForLoopReplaceableByForEach")
+	public CompletableFuture<Chunk> populateNoise(Executor executor, Blender blender, NoiseConfig noiseConfig, StructureAccessor structureAccessor, Chunk chunk) {
+		GenerationShapeConfig generationShapeConfig = this.settings.value().generationShapeConfig().trimHeight(chunk.getHeightLimitView());
+		int minimumY = generationShapeConfig.minimumY();
+		int j = MathHelper.floorDiv(minimumY, generationShapeConfig.verticalCellBlockCount());
+		int k = MathHelper.floorDiv(generationShapeConfig.height(), generationShapeConfig.verticalCellBlockCount());
 
+		if (k <= 0) {
+			return CompletableFuture.completedFuture(chunk);
+		}
+
+		int l = chunk.getSectionIndex(k * generationShapeConfig.verticalCellBlockCount() - 1 + minimumY);
+		int minimumYChunkSectionIndex = chunk.getSectionIndex(minimumY);
+		ArrayList<ChunkSection> set = new ArrayList<>();
+
+		for (int n = l; n >= minimumYChunkSectionIndex; --n) {
+			ChunkSection chunkSection = chunk.getSection(n);
+
+			chunkSection.lock();
+			set.add(chunkSection);
+		}
+
+		return CompletableFuture.supplyAsync(
+				Util.debugSupplier("wgen_fill_noise", () -> this.populateNoise(blender, structureAccessor, noiseConfig, chunk, j, k)),
+				Util.getMainWorkerExecutor()
+		).whenCompleteAsync((chunk2, throwable) -> {
+			// Replace an enhanced for loop with a fori loop
+			for (int i = 0; i < set.size(); i++) {
+				set.get(i).unlock();
+			}
+		}, executor);
 	}
 }
