@@ -1,6 +1,5 @@
 package io.github.steveplays28.noisium.mixin;
 
-import com.google.common.collect.Sets;
 import net.minecraft.SharedConstants;
 import net.minecraft.block.BlockState;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -21,16 +20,14 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.stream.IntStream;
 
 @Mixin(NoiseChunkGenerator.class)
 public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 	@Shadow
 	@Final
-	private RegistryEntry<ChunkGeneratorSettings> settings;
+	public RegistryEntry<ChunkGeneratorSettings> settings;
 
 	public NoiseChunkGeneratorMixin(BiomeSource biomeSource) {
 		super(biomeSource);
