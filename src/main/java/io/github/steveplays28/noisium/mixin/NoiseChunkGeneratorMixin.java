@@ -2,7 +2,6 @@ package io.github.steveplays28.noisium.mixin;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.Heightmap;
@@ -14,19 +13,13 @@ import net.minecraft.world.gen.chunk.*;
 import net.minecraft.world.gen.noise.NoiseConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.stream.IntStream;
 
 @Mixin(NoiseChunkGenerator.class)
-public abstract class MixinNoiseChunkGenerator extends ChunkGenerator {
-	public MixinNoiseChunkGenerator(BiomeSource biomeSource) {
+public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
+	public NoiseChunkGeneratorMixin(BiomeSource biomeSource) {
 		super(biomeSource);
 	}
 
