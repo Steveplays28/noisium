@@ -268,21 +268,21 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 	 */
 	@Overwrite
 	private Chunk populateNoise(Blender blender, StructureAccessor structureAccessor, NoiseConfig noiseConfig, Chunk chunk, int minimumCellY, int cellHeight) {
-		ChunkNoiseSampler chunkNoiseSampler = chunk.getOrCreateChunkNoiseSampler(
+		final ChunkNoiseSampler chunkNoiseSampler = chunk.getOrCreateChunkNoiseSampler(
 				chunk2 -> ((NoiseChunkGenerator) (Object) this).createChunkNoiseSampler(chunk2, structureAccessor, blender, noiseConfig));
-		Heightmap heightmap = chunk.getHeightmap(Heightmap.Type.OCEAN_FLOOR_WG);
-		Heightmap heightmap2 = chunk.getHeightmap(Heightmap.Type.WORLD_SURFACE_WG);
-		ChunkPos chunkPos = chunk.getPos();
-		int chunkPosStartX = chunkPos.getStartX();
-		int chunkPosStartZ = chunkPos.getStartZ();
+		final Heightmap oceanFloorHeightMap = chunk.getHeightmap(Heightmap.Type.OCEAN_FLOOR_WG);
+		final Heightmap worldSurfaceHeightMap = chunk.getHeightmap(Heightmap.Type.WORLD_SURFACE_WG);
+		final ChunkPos chunkPos = chunk.getPos();
+		final int chunkPosStartX = chunkPos.getStartX();
+		final int chunkPosStartZ = chunkPos.getStartZ();
+		final var aquiferSampler = chunkNoiseSampler.getAquiferSampler();
 
-		AquiferSampler aquiferSampler = chunkNoiseSampler.getAquiferSampler();
 		chunkNoiseSampler.sampleStartDensity();
 
-		var mutableBlockPos = new BlockPos.Mutable();
-		int horizontalCellBlockCount = chunkNoiseSampler.getHorizontalCellBlockCount();
-		int verticalCellBlockCount = chunkNoiseSampler.getVerticalCellBlockCount();
-		int horizontalCellCount = 16 / horizontalCellBlockCount;
+		final var mutableBlockPos = new BlockPos.Mutable();
+		final int horizontalCellBlockCount = chunkNoiseSampler.getHorizontalCellBlockCount();
+		final int verticalCellBlockCount = chunkNoiseSampler.getVerticalCellBlockCount();
+		final int horizontalCellCount = 16 / horizontalCellBlockCount;
 
 		for (int baseHorizontalWidthCellIndex = 0; baseHorizontalWidthCellIndex < horizontalCellCount; ++baseHorizontalWidthCellIndex) {
 			chunkNoiseSampler.sampleEndDensity(baseHorizontalWidthCellIndex);
@@ -333,8 +333,8 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 								chunkSection.setBlockState(
 										chunkSectionBlockPosX, chunkSectionBlockPosY, chunkSectionBlockPosZ, blockState, false);
 
-								heightmap.trackUpdate(chunkSectionBlockPosX, blockPosY, chunkSectionBlockPosZ, blockState);
-								heightmap2.trackUpdate(chunkSectionBlockPosX, blockPosY, chunkSectionBlockPosZ, blockState);
+								oceanFloorHeightMap.trackUpdate(chunkSectionBlockPosX, blockPosY, chunkSectionBlockPosZ, blockState);
+								worldSurfaceHeightMap.trackUpdate(chunkSectionBlockPosX, blockPosY, chunkSectionBlockPosZ, blockState);
 
 								if (!aquiferSampler.needsFluidTick() || blockState.getFluidState().isEmpty()) {
 									continue;
