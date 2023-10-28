@@ -263,8 +263,8 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 //	}
 
 	/**
-	 * @author
-	 * @reason
+	 * @author Steveplays28
+	 * @reason TODO
 	 */
 	@Overwrite
 	private Chunk populateNoise(Blender blender, StructureAccessor structureAccessor, NoiseConfig noiseConfig, Chunk chunk, int minimumCellY, int cellHeight) {
@@ -275,30 +275,27 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 		ChunkPos chunkPos = chunk.getPos();
 		int chunkPosStartX = chunkPos.getStartX();
 		int chunkPosStartZ = chunkPos.getStartZ();
-		BlockPos.Mutable mutable = new BlockPos.Mutable();
-		int horizontalCellBlockCount = chunkNoiseSampler.getHorizontalCellBlockCount();
-		int verticalCellBlockCount = chunkNoiseSampler.getVerticalCellBlockCount();
-		int m = 16 / horizontalCellBlockCount;
 
 		AquiferSampler aquiferSampler = chunkNoiseSampler.getAquiferSampler();
 		chunkNoiseSampler.sampleStartDensity();
 
-		for (int o = 0; o < m; ++o) {
-			chunkNoiseSampler.sampleEndDensity(o);
+		var mutableBlockPos = new BlockPos.Mutable();
+		int horizontalCellBlockCount = chunkNoiseSampler.getHorizontalCellBlockCount();
+		int verticalCellBlockCount = chunkNoiseSampler.getVerticalCellBlockCount();
+		int horizontalCellCount = 16 / horizontalCellBlockCount;
 
-			for (int p = 0; p < m; ++p) {
-				int nextChunkSectionIndex = chunk.countVerticalSections() - 1;
-				ChunkSection chunkSection = chunk.getSection(nextChunkSectionIndex);
+		for (int baseHorizontalWidthCellIndex = 0; baseHorizontalWidthCellIndex < horizontalCellCount; ++baseHorizontalWidthCellIndex) {
+			chunkNoiseSampler.sampleEndDensity(baseHorizontalWidthCellIndex);
 
-				// TODO: Multithread here
-				// The vertical chunk sections can be looped over using multithreading here
-				// All the required variables can be passed into the CompletableFuture
+			for (int baseHorizontalLengthCellIndex = 0; baseHorizontalLengthCellIndex < horizontalCellCount; ++baseHorizontalLengthCellIndex) {
+				var nextChunkSectionIndex = chunk.countVerticalSections() - 1;
+				var chunkSection = chunk.getSection(nextChunkSectionIndex);
 
-				for (int r = cellHeight - 1; r >= 0; --r) {
-					chunkNoiseSampler.onSampledCellCorners(r, p);
+				for (int verticalCellHeightIndex = cellHeight - 1; verticalCellHeightIndex >= 0; --verticalCellHeightIndex) {
+					chunkNoiseSampler.onSampledCellCorners(verticalCellHeightIndex, baseHorizontalLengthCellIndex);
 
-					for (int s = verticalCellBlockCount - 1; s >= 0; --s) {
-						int blockPosY = (minimumCellY + r) * verticalCellBlockCount + s;
+					for (int verticalCellBlockIndex = verticalCellBlockCount - 1; verticalCellBlockIndex >= 0; --verticalCellBlockIndex) {
+						int blockPosY = (minimumCellY + verticalCellHeightIndex) * verticalCellBlockCount + verticalCellBlockIndex;
 						int chunkSectionBlockPosY = blockPosY & 0xF;
 						int chunkSectionIndex = chunk.getSectionIndex(blockPosY);
 
@@ -307,20 +304,20 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 							chunkSection = chunk.getSection(chunkSectionIndex);
 						}
 
-						double deltaY = (double) s / verticalCellBlockCount;
+						double deltaY = (double) verticalCellBlockIndex / verticalCellBlockCount;
 						chunkNoiseSampler.interpolateY(blockPosY, deltaY);
 
-						for (int w = 0; w < horizontalCellBlockCount; ++w) {
-							int blockPosX = chunkPosStartX + o * horizontalCellBlockCount + w;
+						for (int horizontalWidthCellBlockIndex = 0; horizontalWidthCellBlockIndex < horizontalCellBlockCount; ++horizontalWidthCellBlockIndex) {
+							int blockPosX = chunkPosStartX + baseHorizontalWidthCellIndex * horizontalCellBlockCount + horizontalWidthCellBlockIndex;
 							int chunkSectionBlockPosX = blockPosX & 0xF;
-							double deltaX = (double) w / horizontalCellBlockCount;
+							double deltaX = (double) horizontalWidthCellBlockIndex / horizontalCellBlockCount;
 
 							chunkNoiseSampler.interpolateX(blockPosX, deltaX);
 
-							for (int z = 0; z < horizontalCellBlockCount; ++z) {
-								int blockPosZ = chunkPosStartZ + p * horizontalCellBlockCount + z;
+							for (int horizontalLengthCellBlockIndex = 0; horizontalLengthCellBlockIndex < horizontalCellBlockCount; ++horizontalLengthCellBlockIndex) {
+								int blockPosZ = chunkPosStartZ + baseHorizontalLengthCellIndex * horizontalCellBlockCount + horizontalLengthCellBlockIndex;
 								int chunkSectionBlockPosZ = blockPosZ & 0xF;
-								double deltaZ = (double) z / horizontalCellBlockCount;
+								double deltaZ = (double) horizontalLengthCellBlockIndex / horizontalCellBlockCount;
 
 								chunkNoiseSampler.interpolateZ(blockPosZ, deltaZ);
 								BlockState blockState = chunkNoiseSampler.sampleBlockState();
@@ -343,11 +340,12 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 									continue;
 								}
 
-								mutable.set(blockPosX, blockPosY, blockPosZ);
-								chunk.markBlockForPostProcessing(mutable);
+								mutableBlockPos.set(blockPosX, blockPosY, blockPosZ);
+								chunk.markBlockForPostProcessing(mutableBlockPos);
 							}
 						}
 					}
+
 				}
 			}
 
