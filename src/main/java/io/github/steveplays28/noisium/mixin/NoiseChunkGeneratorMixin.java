@@ -11,7 +11,6 @@ import net.minecraft.world.Heightmap;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.gen.StructureAccessor;
 import net.minecraft.world.gen.chunk.*;
 import net.minecraft.world.gen.noise.NoiseConfig;
@@ -299,7 +298,6 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 						int blockPosY = (minimumCellY + verticalCellHeightIndex) * verticalCellBlockCount + verticalCellBlockIndex;
 						int chunkSectionBlockPosY = blockPosY & 0xF;
 						int chunkSectionIndex = chunk.getSectionIndex(blockPosY);
-						boolean isFirstLoopInTheSection = true;
 
 						if (nextChunkSectionIndex != chunkSectionIndex) {
 							nextChunkSectionIndex = chunkSectionIndex;
@@ -332,31 +330,15 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 									continue;
 								}
 
-								// TODO: Replace this bandaid fix with an actual fix
-								if (isFirstLoopInTheSection) {
-									chunkSection.setBlockState(
-											chunkSectionBlockPosX, chunkSectionBlockPosY, chunkSectionBlockPosZ, blockState, false);
-									isFirstLoopInTheSection = false;
-								} else {
-									chunkSection.nonEmptyBlockCount = (short) (chunkSection.nonEmptyBlockCount - 1);
+								// Update the non empty block count to avoid issues with MC's lighting engine and other systems not recognising the direct palette storage set
+								chunkSection.nonEmptyBlockCount = (short) (chunkSection.nonEmptyBlockCount - 1);
 
-									// Set the blockstate in the palette storage directly to improve performance
-									chunkSection.blockStateContainer.data.storage().set(
-											chunkSection.blockStateContainer.paletteProvider.computeIndex(chunkSectionBlockPosX,
-													chunkSectionBlockPosY, chunkSectionBlockPosZ
-											), chunkSection.blockStateContainer.data.palette.index(blockState));
-
-									// Update the lighting on the client after setting the block state directly
-									// This avoids issues with MC's lighting engine not recognising the direct palette storage blockstate update
-									if (chunk instanceof WorldChunk worldChunk) {
-										final var world = worldChunk.getWorld();
-
-										if (world.isClient()) {
-											mutableBlockPos.set(chunkSectionBlockPosX, chunkSectionBlockPosY, chunkSectionBlockPosZ);
-											world.getChunkManager().getLightingProvider().checkBlock(mutableBlockPos);
-										}
-									}
-								}
+								// Set the blockstate in the palette storage directly to improve performance
+								var blockStateId = chunkSection.blockStateContainer.data.palette.index(blockState);
+								chunkSection.blockStateContainer.data.storage().set(
+										chunkSection.blockStateContainer.paletteProvider.computeIndex(chunkSectionBlockPosX,
+												chunkSectionBlockPosY, chunkSectionBlockPosZ
+										), blockStateId);
 
 								oceanFloorHeightMap.trackUpdate(chunkSectionBlockPosX, blockPosY, chunkSectionBlockPosZ, blockState);
 								worldSurfaceHeightMap.trackUpdate(chunkSectionBlockPosX, blockPosY, chunkSectionBlockPosZ, blockState);
