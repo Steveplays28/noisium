@@ -14,10 +14,7 @@ import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.gen.StructureAccessor;
 import net.minecraft.world.gen.chunk.*;
 import net.minecraft.world.gen.noise.NoiseConfig;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
@@ -28,6 +25,9 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 	@Shadow
 	@Final
 	public RegistryEntry<ChunkGeneratorSettings> settings;
+
+	@Unique
+	private final BlockPos.Mutable mutableBlockPos = new BlockPos.Mutable();
 
 	public NoiseChunkGeneratorMixin(BiomeSource biomeSource) {
 		super(biomeSource);
@@ -50,7 +50,6 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 
 		chunkNoiseSampler.sampleStartDensity();
 
-		final var mutableBlockPos = new BlockPos.Mutable();
 		final int horizontalCellBlockCount = chunkNoiseSampler.getHorizontalCellBlockCount();
 		final int verticalCellBlockCount = chunkNoiseSampler.getVerticalCellBlockCount();
 		final int horizontalCellCount = 16 / horizontalCellBlockCount;
