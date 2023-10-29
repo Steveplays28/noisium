@@ -35,7 +35,7 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 
 	/**
 	 * @author Steveplays28
-	 * @reason TODO
+	 * @reason Direct palette storage blockstate set optimisation
 	 */
 	@Overwrite
 	private Chunk populateNoise(Blender blender, StructureAccessor structureAccessor, NoiseConfig noiseConfig, Chunk chunk, int minimumCellY, int cellHeight) {
