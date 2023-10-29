@@ -337,22 +337,24 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 									chunkSection.setBlockState(
 											chunkSectionBlockPosX, chunkSectionBlockPosY, chunkSectionBlockPosZ, blockState, false);
 									isFirstLoopInTheSection = false;
-								}
+								} else {
+									chunkSection.nonEmptyBlockCount = (short) (chunkSection.nonEmptyBlockCount - 1);
 
-								// Set the blockstate in the palette storage directly to improve performance
-								chunkSection.blockStateContainer.data.storage().set(
-										chunkSection.blockStateContainer.paletteProvider.computeIndex(chunkSectionBlockPosX,
-												chunkSectionBlockPosY, chunkSectionBlockPosZ
-										), chunkSection.blockStateContainer.data.palette.index(blockState));
+									// Set the blockstate in the palette storage directly to improve performance
+									chunkSection.blockStateContainer.data.storage().set(
+											chunkSection.blockStateContainer.paletteProvider.computeIndex(chunkSectionBlockPosX,
+													chunkSectionBlockPosY, chunkSectionBlockPosZ
+											), chunkSection.blockStateContainer.data.palette.index(blockState));
 
-								// Update the lighting on the client after setting the block state directly
-								// This avoids issues with MC's lighting engine not recognising the direct palette storage blockstate update
-								if (chunk instanceof WorldChunk worldChunk) {
-									final var world = worldChunk.getWorld();
+									// Update the lighting on the client after setting the block state directly
+									// This avoids issues with MC's lighting engine not recognising the direct palette storage blockstate update
+									if (chunk instanceof WorldChunk worldChunk) {
+										final var world = worldChunk.getWorld();
 
-									if (world.isClient()) {
-										mutableBlockPos.set(chunkSectionBlockPosX, chunkSectionBlockPosY, chunkSectionBlockPosZ);
-										world.getChunkManager().getLightingProvider().checkBlock(mutableBlockPos);
+										if (world.isClient()) {
+											mutableBlockPos.set(chunkSectionBlockPosX, chunkSectionBlockPosY, chunkSectionBlockPosZ);
+											world.getChunkManager().getLightingProvider().checkBlock(mutableBlockPos);
+										}
 									}
 								}
 
