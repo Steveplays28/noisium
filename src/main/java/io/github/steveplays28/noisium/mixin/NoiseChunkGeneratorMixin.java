@@ -2,19 +2,16 @@ package io.github.steveplays28.noisium.mixin;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.WorldChunk;
-import net.minecraft.world.chunk.light.ChunkLightProvider;
 import net.minecraft.world.gen.StructureAccessor;
 import net.minecraft.world.gen.chunk.*;
 import net.minecraft.world.gen.noise.NoiseConfig;
@@ -24,7 +21,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -288,8 +284,6 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 		final int horizontalCellBlockCount = chunkNoiseSampler.getHorizontalCellBlockCount();
 		final int verticalCellBlockCount = chunkNoiseSampler.getVerticalCellBlockCount();
 		final int horizontalCellCount = 16 / horizontalCellBlockCount;
-		// TODO: Refactor to an int[] for better performance
-//		final ArrayList<BlockPos> stoneBlockStatePositions = new ArrayList<>();
 
 		for (int baseHorizontalWidthCellIndex = 0; baseHorizontalWidthCellIndex < horizontalCellCount; ++baseHorizontalWidthCellIndex) {
 			chunkNoiseSampler.sampleEndDensity(baseHorizontalWidthCellIndex);
@@ -338,15 +332,7 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 									continue;
 								}
 
-//								if (blockState.equals(Blocks.STONE.getDefaultState())) {
-//									// Reuse the same mutableBlockPos for increased performance
-//									mutableBlockPos.set(chunkSectionBlockPosX, chunkSectionBlockPosY, chunkSectionBlockPosZ);
-//									stoneBlockStatePositions.add(mutableBlockPos);
-//								} else {
-//									chunkSection.setBlockState(
-//											chunkSectionBlockPosX, chunkSectionBlockPosY, chunkSectionBlockPosZ, blockState, false);
-//								}
-
+								// TODO: Replace this bandaid fix with an actual fix
 								if (isFirstLoopInTheSection) {
 									chunkSection.setBlockState(
 											chunkSectionBlockPosX, chunkSectionBlockPosY, chunkSectionBlockPosZ, blockState, false);
@@ -383,28 +369,6 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 						}
 					}
 				}
-
-//				// Set all stoneBlockStates directly via the palette storage
-//				final ChunkSection chunkSectionFinal = chunkSection;
-//				final var stoneBlockStateValueIndex = chunkSectionFinal.blockStateContainer.data.palette.index(
-//						Blocks.STONE.getDefaultState());
-//
-//				stoneBlockStatePositions.forEach(blockPos -> {
-//					chunkSectionFinal.blockStateContainer.data.storage().swap(
-//							chunkSectionFinal.blockStateContainer.paletteProvider.computeIndex(blockPos.getX(), blockPos.getY(),
-//									blockPos.getZ()
-//							), stoneBlockStateValueIndex);
-//
-//					if (chunk instanceof WorldChunk worldChunk) {
-//						final var world = worldChunk.getWorld();
-//
-//						if (world.isClient()) {
-//							world.getChunkManager().getLightingProvider().checkBlock(blockPos);
-//						}
-//					}
-//				});
-//
-//				stoneBlockStatePositions.clear();
 			}
 
 			chunkNoiseSampler.swapBuffers();
