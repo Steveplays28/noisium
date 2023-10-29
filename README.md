@@ -45,6 +45,10 @@ Server side.
 - Q: Does only the server need this mod or does the client need it too?  
   A: Only the server needs this mod (but it works on the client too if you're going to host LAN or play singleplayer).
 
+## Attribution
+
+Thanks to [Builderb0y](https://modrinth.com/user/Builderb0y) for giving great starting points and helping with some issues.
+
 ## License
 
 This project is licensed under LGPLv2.1, see [LICENSE](https://github.com/Steveplays28/noisium/blob/main/LICENSE).
