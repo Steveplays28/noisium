@@ -4,6 +4,8 @@
 
 Optimises worldgen performance for a better gameplay experience.
 
+The improvements lie between a 20-30% speedup when generating new chunks in vanilla Minecraft (benchmarked on 1.20.1 Fabric).
+
 ## Dependencies
 
 ### Required
