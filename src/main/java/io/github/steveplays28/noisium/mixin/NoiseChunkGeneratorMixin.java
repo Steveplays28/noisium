@@ -297,7 +297,6 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 			for (int baseHorizontalLengthCellIndex = 0; baseHorizontalLengthCellIndex < horizontalCellCount; ++baseHorizontalLengthCellIndex) {
 				var nextChunkSectionIndex = chunk.countVerticalSections() - 1;
 				var chunkSection = chunk.getSection(nextChunkSectionIndex);
-				boolean isFirstLoopInTheSection = true;
 
 				for (int verticalCellHeightIndex = cellHeight - 1; verticalCellHeightIndex >= 0; --verticalCellHeightIndex) {
 					chunkNoiseSampler.onSampledCellCorners(verticalCellHeightIndex, baseHorizontalLengthCellIndex);
@@ -306,6 +305,7 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 						int blockPosY = (minimumCellY + verticalCellHeightIndex) * verticalCellBlockCount + verticalCellBlockIndex;
 						int chunkSectionBlockPosY = blockPosY & 0xF;
 						int chunkSectionIndex = chunk.getSectionIndex(blockPosY);
+						boolean isFirstLoopInTheSection = true;
 
 						if (nextChunkSectionIndex != chunkSectionIndex) {
 							nextChunkSectionIndex = chunkSectionIndex;
