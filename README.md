@@ -47,7 +47,7 @@ Server side.
 
 ## Attribution
 
-Thanks to [Builderb0y](https://modrinth.com/user/Builderb0y) for giving great starting points and helping with some issues.
+- Thanks to [Builderb0y](https://modrinth.com/user/Builderb0y) for giving great starting points and helping with some issues.
 
 ## License
 
