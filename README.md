@@ -51,4 +51,4 @@ Server side.
 
 ## License
 
-This project is licensed under LGPLv2.1, see [LICENSE](https://github.com/Steveplays28/noisium/blob/main/LICENSE).
+This project is licensed under LGPLv3, see [LICENSE](https://github.com/Steveplays28/noisium/blob/main/LICENSE).
