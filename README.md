@@ -13,7 +13,9 @@ other smaller optimisations, that increase biome population speed, chunk unlocki
 generation.  
 In `NoiseChunkGenerator#populateNoise`, setting the blockstate via abstractions/built-in functions is bypassed. Instead, the blocks are set
 directly in the palette storage, thus bypassing a lot of calculations and things Minecraft does that are normally useful when blocks are
-set, but when generating the world only slow it down.
+set, but when generating the world only slow it down, this is a cycle optimisation.
+
+Noisium has full 1:1 parity with vanilla worldgen (worldgen without Noisium).
 
 ## Dependencies
 
