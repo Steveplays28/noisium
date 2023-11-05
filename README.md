@@ -8,10 +8,10 @@ The improvements lie between a 20-30% speedup when generating new chunks in vani
 
 Noisium changes some world generation functions that other mods don't touch, to fill in the gaps left by other performance optimisation
 mods.
-Most notably, NoiseChunkGenerator#populateNoise is optimised to speed up blockstate placement when generating new chunks. There are also 3
+Most notably, `NoiseChunkGenerator#populateNoise` is optimised to speed up blockstate placement when generating new chunks. There are also 3
 other smaller optimisations, that increase biome population speed, chunk unlocking speed, and the speed of sampling blockstates for
 generation.  
-In NoiseChunkGenerator#populateNoise, setting the blockstate via abstractions/built-in functions is bypassed. Instead, the blocks are set
+In `NoiseChunkGenerator#populateNoise`, setting the blockstate via abstractions/built-in functions is bypassed. Instead, the blocks are set
 directly in the palette storage, thus bypassing a lot of calculations and things Minecraft does that are normally useful when blocks are
 set, but when generating the world only slow it down.
 
