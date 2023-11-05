@@ -6,13 +6,32 @@ Optimises worldgen performance for a better gameplay experience.
 
 The improvements lie between a 20-30% speedup when generating new chunks in vanilla Minecraft (benchmarked on 1.20.1 Fabric).
 
+Noisium changes some world generation functions that other mods don't touch, to fill in the gaps left by other performance optimisation
+mods.
+Most notably, NoiseChunkGenerator#populateNoise is optimised to speed up blockstate placement when generating new chunks. There are also 3
+other smaller optimisations, that increase biome population speed, chunk unlocking speed, and the speed of sampling blockstates for
+generation.  
+In NoiseChunkGenerator#populateNoise, setting the blockstate via abstractions/built-in functions is bypassed. Instead, the blocks are set
+directly in the palette storage, thus bypassing a lot of calculations and things Minecraft does that are normally useful when blocks are
+set, but when generating the world only slow it down.
+
 ## Dependencies
 
 ### Required
 
 None.
 
-## Incompatibilities
+## Compatibility info
+
+### Compatible mods
+
+Noisium should be compatible with most, if not all, of the popular optimisation mods currently on Modrinth/CurseForge for
+Minecraft `1.20.x`, since Noisium aims to fill in the gaps in performance optimisation left by other mods.
+This includes (but is not limited to) C2ME, Lithium, Nvidium, and Sodium.
+
+- Distant Horizons: Noisium speeds up LOD world generation threads, since LOD generation depends on Minecraft's world generation speed.
+
+### Incompatibilities
 
 No known incompatibilities at this time.
 
