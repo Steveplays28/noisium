@@ -100,7 +100,16 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 								}
 
 								// Update the non empty block count to avoid issues with MC's lighting engine and other systems not recognising the direct palette storage set
-								chunkSection.nonEmptyBlockCount = (short) (chunkSection.nonEmptyBlockCount - 1);
+								// See ChunkSection#setBlockState
+								chunkSection.nonEmptyBlockCount += 1;
+
+								if (!blockState.getFluidState().isEmpty()) {
+									chunkSection.nonEmptyFluidCount += 1;
+								}
+
+								if (blockState.hasRandomTicks()) {
+									chunkSection.randomTickableBlockCount += 1;
+								}
 
 								// Set the blockstate in the palette storage directly to improve performance
 								var blockStateId = chunkSection.blockStateContainer.data.palette.index(blockState);
