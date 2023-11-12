@@ -42,5 +42,8 @@
   "depends": {
     "fabricloader": ">=${loader_version}",
     "minecraft": "1.20.x"
+  },
+  "suggests": {
+    "c2me": "*"
   }
 }
