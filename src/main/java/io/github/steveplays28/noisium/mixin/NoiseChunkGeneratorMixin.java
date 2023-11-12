@@ -25,9 +25,6 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 	@Final
 	public RegistryEntry<ChunkGeneratorSettings> settings;
 
-	@Unique
-	private final BlockPos.Mutable mutableBlockPos = new BlockPos.Mutable();
-
 	public NoiseChunkGeneratorMixin(BiomeSource biomeSource) {
 		super(biomeSource);
 	}
@@ -52,6 +49,7 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 		final int horizontalCellBlockCount = chunkNoiseSampler.getHorizontalCellBlockCount();
 		final int verticalCellBlockCount = chunkNoiseSampler.getVerticalCellBlockCount();
 		final int horizontalCellCount = 16 / horizontalCellBlockCount;
+		final var mutableBlockPos = new BlockPos.Mutable();
 
 		for (int baseHorizontalWidthCellIndex = 0; baseHorizontalWidthCellIndex < horizontalCellCount; ++baseHorizontalWidthCellIndex) {
 			chunkNoiseSampler.sampleEndDensity(baseHorizontalWidthCellIndex);
@@ -149,13 +147,13 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 	public CompletableFuture<Chunk> populateNoise(Executor executor, Blender blender, NoiseConfig noiseConfig, StructureAccessor structureAccessor, Chunk chunk) {
 		GenerationShapeConfig generationShapeConfig = this.settings.value().generationShapeConfig().trimHeight(chunk.getHeightLimitView());
 		int minimumY = generationShapeConfig.minimumY();
-		int minimumYFloorDiv = Math.floorDiv(minimumY, generationShapeConfig.verticalCellBlockCount());
 		int generationShapeHeightFloorDiv = Math.floorDiv(generationShapeConfig.height(), generationShapeConfig.verticalCellBlockCount());
 
 		if (generationShapeHeightFloorDiv <= 0) {
 			return CompletableFuture.completedFuture(chunk);
 		}
 
+		int minimumYFloorDiv = Math.floorDiv(minimumY, generationShapeConfig.verticalCellBlockCount());
 		int startingChunkSectionIndex = chunk.getSectionIndex(
 				generationShapeHeightFloorDiv * generationShapeConfig.verticalCellBlockCount() - 1 + minimumY);
 		int minimumYChunkSectionIndex = chunk.getSectionIndex(minimumY);
