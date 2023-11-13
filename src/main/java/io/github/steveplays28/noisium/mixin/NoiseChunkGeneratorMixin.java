@@ -1,5 +1,6 @@
 package io.github.steveplays28.noisium.mixin;
 
+import io.github.steveplays28.noisium.Noisium;
 import net.minecraft.SharedConstants;
 import net.minecraft.block.BlockState;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -25,6 +26,9 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 	@Final
 	public RegistryEntry<ChunkGeneratorSettings> settings;
 
+	@Shadow
+	public abstract int getSeaLevel();
+
 	public NoiseChunkGeneratorMixin(BiomeSource biomeSource) {
 		super(biomeSource);
 	}
@@ -49,16 +53,22 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 		final int horizontalCellBlockCount = chunkNoiseSampler.getHorizontalCellBlockCount();
 		final int verticalCellBlockCount = chunkNoiseSampler.getVerticalCellBlockCount();
 		final int horizontalCellCount = 16 / horizontalCellBlockCount;
+		final var chunkVerticalSections = chunk.countVerticalSections();
 		final var mutableBlockPos = new BlockPos.Mutable();
+		final var shouldLoadBottomVerticalSection = shouldLoadBottomVerticalSection(getSeaLevel());
 
 		for (int baseHorizontalWidthCellIndex = 0; baseHorizontalWidthCellIndex < horizontalCellCount; ++baseHorizontalWidthCellIndex) {
 			chunkNoiseSampler.sampleEndDensity(baseHorizontalWidthCellIndex);
 
 			for (int baseHorizontalLengthCellIndex = 0; baseHorizontalLengthCellIndex < horizontalCellCount; ++baseHorizontalLengthCellIndex) {
-				var nextChunkSectionIndex = chunk.countVerticalSections() - 1;
+				var nextChunkSectionIndex = chunkVerticalSections - 1;
 				var chunkSection = chunk.getSection(nextChunkSectionIndex);
 
-				for (int verticalCellHeightIndex = cellHeight - 1; verticalCellHeightIndex >= 0; --verticalCellHeightIndex) {
+				for (int verticalCellHeightIndex = cellHeight - 1; shouldLoadBottomVerticalSection ? verticalCellHeightIndex >= 0 : verticalCellHeightIndex >= 12; --verticalCellHeightIndex) {
+					if (verticalCellHeightIndex > 32 && shouldLoadBottomVerticalSection) {
+						continue;
+					}
+
 					chunkNoiseSampler.onSampledCellCorners(verticalCellHeightIndex, baseHorizontalLengthCellIndex);
 
 					for (int verticalCellBlockIndex = verticalCellBlockCount - 1; verticalCellBlockIndex >= 0; --verticalCellBlockIndex) {
@@ -177,5 +187,19 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 				chunkSections.get(i).unlock();
 			}
 		}, executor);
+	}
+
+	@Unique
+	@SuppressWarnings("ForLoopReplaceableByForEach")
+	private boolean shouldLoadBottomVerticalSection(int thresholdY) {
+		var playerList = Noisium.server.getPlayerManager().getPlayerList();
+
+		for (int i = 0; i < playerList.size(); i++) {
+			if (playerList.get(i).getPos().getY() <= thresholdY) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }
