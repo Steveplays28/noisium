@@ -50,10 +50,13 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 		final int verticalCellBlockCount = chunkNoiseSampler.getVerticalCellBlockCount();
 		final int horizontalCellCount = 16 / horizontalCellBlockCount;
 		final var mutableBlockPos = new BlockPos.Mutable();
+		final var isRunningOnDhThread = Thread.currentThread().getName().startsWith("DH");
 
+		// TODO: Fix quality drop happening to normal world generation
+		// TODO: Fix quality drop sometimes causing unsafe indices
 		int qualityDrop;
-		if (Thread.currentThread().getName().startsWith("DH")) {
-			qualityDrop = 128;
+		if (isRunningOnDhThread) {
+			qualityDrop = 32;
 		} else {
 			qualityDrop = 1;
 		}
@@ -68,6 +71,9 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 				for (int verticalCellHeightIndex = cellHeight - 1; verticalCellHeightIndex >= 0; --verticalCellHeightIndex) {
 					chunkNoiseSampler.onSampledCellCorners(verticalCellHeightIndex, baseHorizontalLengthCellIndex);
 
+					var verticalCellBlockIndexToSample = verticalCellBlockCount - 1;
+					int previousVerticalCellBlockIndexToSample = verticalCellBlockCount;
+
 					for (int verticalCellBlockIndex = verticalCellBlockCount - 1; verticalCellBlockIndex >= 0; --verticalCellBlockIndex) {
 						int blockPosY = (minimumCellY + verticalCellHeightIndex) * verticalCellBlockCount + verticalCellBlockIndex;
 						int chunkSectionBlockPosY = blockPosY & 0xF;
@@ -78,18 +84,25 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 							chunkSection = chunk.getSection(chunkSectionIndex);
 						}
 
-						double deltaY = (double) verticalCellBlockIndex / verticalCellBlockCount;
-						chunkNoiseSampler.interpolateY(blockPosY, deltaY);
+						if (verticalCellBlockIndexToSample != previousVerticalCellBlockIndexToSample) {
+							double deltaY = (double) verticalCellBlockIndexToSample / verticalCellBlockCount;
+							chunkNoiseSampler.interpolateY(blockPosY, deltaY);
+						}
+
+						if (verticalCellBlockIndexToSample >= 0) {
+							verticalCellBlockIndexToSample -= qualityDrop;
+							previousVerticalCellBlockIndexToSample = verticalCellBlockIndexToSample;
+						}
 
 						var horizontalWidthCellBlockIndexToSample = 0;
-						int previousHorizontalLWidthCellBlockIndexToSample = -1;
+						int previousHorizontalWidthCellBlockIndexToSample = -1;
 						BlockState previousBlockState = null;
 
 						for (int horizontalWidthCellBlockIndex = 0; horizontalWidthCellBlockIndex < horizontalCellBlockCount; ++horizontalWidthCellBlockIndex) {
 							int blockPosX = chunkPosStartX + baseHorizontalWidthCellIndex * horizontalCellBlockCount + horizontalWidthCellBlockIndex;
 							int chunkSectionBlockPosX = blockPosX & 0xF;
 
-							if (horizontalWidthCellBlockIndexToSample != previousHorizontalLWidthCellBlockIndexToSample) {
+							if (horizontalWidthCellBlockIndexToSample != previousHorizontalWidthCellBlockIndexToSample) {
 								double deltaX = (double) horizontalWidthCellBlockIndexToSample / horizontalCellBlockCount;
 								chunkNoiseSampler.interpolateX(blockPosX, deltaX);
 							}
