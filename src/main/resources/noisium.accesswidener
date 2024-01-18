@@ -16,3 +16,5 @@ accessible class net/minecraft/world/chunk/ChunkStatus$GenerationTask
 accessible field net/minecraft/world/chunk/ChunkSection nonEmptyBlockCount S
 accessible field net/minecraft/world/chunk/ChunkSection nonEmptyFluidCount S
 accessible field net/minecraft/world/chunk/ChunkSection randomTickableBlockCount S
+accessible field net/minecraft/world/gen/chunk/ChunkNoiseSampler$DensityInterpolator startDensityBuffer [[D
+accessible field net/minecraft/world/gen/chunk/ChunkNoiseSampler$DensityInterpolator endDensityBuffer [[D

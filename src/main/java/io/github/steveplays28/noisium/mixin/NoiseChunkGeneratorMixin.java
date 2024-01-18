@@ -7,6 +7,7 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.chunk.Chunk;
@@ -52,7 +53,7 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 		final int horizontalCellCount = 16 / horizontalCellBlockCount;
 		final var mutableBlockPos = new BlockPos.Mutable();
 
-		// TODO: Fix quality drop sometimes causing unsafe indices
+		// TODO: Separate the vertical quality drop and lower it
 		int qualityDrop;
 		if (DhApi.isDhThread()) {
 			qualityDrop = 32;
@@ -90,7 +91,8 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 
 						if (verticalCellBlockIndexToSample >= 0) {
 							previousVerticalCellBlockIndexToSample = verticalCellBlockIndexToSample;
-							verticalCellBlockIndexToSample -= qualityDrop;
+							verticalCellBlockIndexToSample = MathHelper.clamp(
+									verticalCellBlockIndexToSample - qualityDrop, 0, Integer.MAX_VALUE);
 						}
 
 						var horizontalWidthCellBlockIndexToSample = 0;
@@ -128,7 +130,8 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 
 								if (horizontalLengthCellBlockIndexToSample < horizontalCellBlockCount) {
 									previousHorizontalLengthCellBlockIndexToSample = horizontalLengthCellBlockIndexToSample;
-									horizontalLengthCellBlockIndexToSample += qualityDrop;
+									horizontalLengthCellBlockIndexToSample = MathHelper.clamp(
+											horizontalLengthCellBlockIndexToSample + qualityDrop, 0, horizontalCellBlockCount - 1);
 								}
 
 								if (blockState == null) {
@@ -171,7 +174,8 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 
 							if (horizontalWidthCellBlockIndexToSample < horizontalCellBlockCount) {
 								previousHorizontalWidthCellBlockIndexToSample = horizontalWidthCellBlockIndexToSample;
-								horizontalWidthCellBlockIndexToSample += qualityDrop;
+								horizontalWidthCellBlockIndexToSample = MathHelper.clamp(
+										horizontalWidthCellBlockIndexToSample + qualityDrop, 0, horizontalCellBlockCount - 1);
 							}
 						}
 					}

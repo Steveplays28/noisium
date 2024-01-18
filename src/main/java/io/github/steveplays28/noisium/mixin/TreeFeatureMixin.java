@@ -28,6 +28,10 @@ public abstract class TreeFeatureMixin {
 	 */
 	@Overwrite
 	private boolean generate(@NotNull StructureWorldAccess world, Random random, BlockPos pos, BiConsumer<BlockPos, BlockState> rootPlacerReplacer, BiConsumer<BlockPos, BlockState> trunkPlacerReplacer, FoliagePlacer.BlockPlacer blockPlacer, @NotNull TreeFeatureConfig config) {
+		if (DhApi.isDhThread()) {
+			return true;
+		}
+
 		int trunkHeight = config.trunkPlacer.getHeight(random);
 		BlockPos blockPos = config.rootPlacer.map(rootPlacer -> rootPlacer.trunkOffset(pos, random)).orElse(pos);
 		int smallestBlockPosY = Math.min(pos.getY(), blockPos.getY());
@@ -48,19 +52,13 @@ public abstract class TreeFeatureMixin {
 			return false;
 		}
 
-		if (DhApi.isDhThread()) {
-			config.trunkPlacer.generate(world, trunkPlacerReplacer, random, topPosition, blockPos, config);
-			return true;
-		} else {
-			int foliageRandomHeight = config.foliagePlacer.getRandomHeight(random, trunkHeight, config);
-			int foliageRandomRadius = config.foliagePlacer.getRandomRadius(random, trunkHeight - foliageRandomHeight);
-			var treeNodes = config.trunkPlacer.generate(world, trunkPlacerReplacer, random, topPosition, blockPos, config);
+		int foliageRandomHeight = config.foliagePlacer.getRandomHeight(random, trunkHeight, config);
+		int foliageRandomRadius = config.foliagePlacer.getRandomRadius(random, trunkHeight - foliageRandomHeight);
+		var treeNodes = config.trunkPlacer.generate(world, trunkPlacerReplacer, random, topPosition, blockPos, config);
 
-			treeNodes.forEach(
-					node -> config.foliagePlacer.generate(world, blockPlacer, random, config, topPosition, node, foliageRandomHeight,
-							foliageRandomRadius
-					));
-		}
+		treeNodes.forEach(node -> config.foliagePlacer.generate(world, blockPlacer, random, config, topPosition, node, foliageRandomHeight,
+				foliageRandomRadius
+		));
 
 		return true;
 	}
