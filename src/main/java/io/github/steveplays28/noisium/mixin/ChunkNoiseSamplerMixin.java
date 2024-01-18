@@ -53,6 +53,16 @@ public class ChunkNoiseSamplerMixin {
 	@Final
 	List<ChunkNoiseSampler.DensityInterpolator> interpolators;
 
+	@Shadow
+	int index;
+
+	@Shadow
+	int cellBlockY;
+
+	@Shadow
+	@Final
+	int verticalCellBlockCount;
+
 	/**
 	 * @author Steveplays28
 	 * @reason Optimise density sampling for Distant Horizons' LODs
@@ -78,6 +88,29 @@ public class ChunkNoiseSamplerMixin {
 		}
 
 		++this.cacheOnceUniqueIndex;
+	}
+
+	/**
+	 * @author Steveplays28
+	 * @reason Axis order micro-optimisation
+	 */
+	@Overwrite
+	public void fill(double[] densities, DensityFunction densityFunction) {
+		this.index = 0;
+
+		for (int horizontalWidthCellBlock = 0; horizontalWidthCellBlock < this.horizontalCellBlockCount; horizontalWidthCellBlock++) {
+			this.cellBlockX = horizontalWidthCellBlock;
+
+			for (int horizontalLengthCellBlock = 0; horizontalLengthCellBlock < this.horizontalCellBlockCount; horizontalLengthCellBlock++) {
+				this.cellBlockZ = horizontalLengthCellBlock;
+
+				for (int verticalCellBlock = this.verticalCellBlockCount - 1; verticalCellBlock >= 0; --verticalCellBlock) {
+					this.cellBlockY = verticalCellBlock;
+
+					densities[this.index++] = densityFunction.sample((DensityFunction.NoisePos) this);
+				}
+			}
+		}
 	}
 
 	@Mixin(ChunkNoiseSampler.DensityInterpolator.class)
