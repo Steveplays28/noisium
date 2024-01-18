@@ -23,6 +23,9 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
+
+    // Distant Horizons
+    flatDir { dir 'libraries' }
 }
 
 dependencies {
@@ -36,6 +39,10 @@ dependencies {
 
     // Mod Menu
     modRuntimeOnly "maven.modrinth:modmenu:${mod_menu_version}"
+
+    // Distant Horizons
+    modImplementation "blank:DistantHorizonsApi-1.1.0"
+    modRuntimeOnly "blank:DistantHorizons-2.0.2-a-dev-1.20.1"
 }
 
 processResources {

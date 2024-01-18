@@ -1,5 +1,6 @@
 package io.github.steveplays28.noisium.mixin;
 
+import com.seibel.distanthorizons.api.DhApi;
 import net.minecraft.SharedConstants;
 import net.minecraft.block.BlockState;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -46,16 +47,14 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 
 		chunkNoiseSampler.sampleStartDensity();
 
-		final int horizontalCellBlockCount = chunkNoiseSampler.getHorizontalCellBlockCount();
+		final int horizontalCellBlockCount = DhApi.isDhThread() ? 4 : chunkNoiseSampler.getHorizontalCellBlockCount();
 		final int verticalCellBlockCount = chunkNoiseSampler.getVerticalCellBlockCount();
 		final int horizontalCellCount = 16 / horizontalCellBlockCount;
 		final var mutableBlockPos = new BlockPos.Mutable();
-		final var isRunningOnDhThread = Thread.currentThread().getName().startsWith("DH");
 
-		// TODO: Fix quality drop happening to normal world generation
 		// TODO: Fix quality drop sometimes causing unsafe indices
 		int qualityDrop;
-		if (isRunningOnDhThread) {
+		if (DhApi.isDhThread()) {
 			qualityDrop = 32;
 		} else {
 			qualityDrop = 1;
@@ -90,8 +89,8 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 						}
 
 						if (verticalCellBlockIndexToSample >= 0) {
-							verticalCellBlockIndexToSample -= qualityDrop;
 							previousVerticalCellBlockIndexToSample = verticalCellBlockIndexToSample;
+							verticalCellBlockIndexToSample -= qualityDrop;
 						}
 
 						var horizontalWidthCellBlockIndexToSample = 0;
@@ -115,24 +114,26 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 								int chunkSectionBlockPosZ = blockPosZ & 0xF;
 								BlockState blockState;
 
-								if (horizontalLengthCellBlockIndexToSample != previousHorizontalLengthCellBlockIndexToSample || previousBlockState == null) {
+								if (horizontalLengthCellBlockIndexToSample != previousHorizontalLengthCellBlockIndexToSample) {
 									double deltaZ = (double) horizontalLengthCellBlockIndexToSample / horizontalCellBlockCount;
 									chunkNoiseSampler.interpolateZ(blockPosZ, deltaZ);
 									blockState = chunkNoiseSampler.sampleBlockState();
+
+									if (previousBlockState == null) {
+										previousBlockState = blockState;
+									}
 								} else {
 									blockState = previousBlockState;
 								}
 
 								if (horizontalLengthCellBlockIndexToSample < horizontalCellBlockCount) {
-									horizontalLengthCellBlockIndexToSample += qualityDrop;
 									previousHorizontalLengthCellBlockIndexToSample = horizontalLengthCellBlockIndexToSample;
+									horizontalLengthCellBlockIndexToSample += qualityDrop;
 								}
 
 								if (blockState == null) {
 									blockState = ((NoiseChunkGenerator) (Object) this).settings.value().defaultBlock();
 								}
-
-								previousBlockState = blockState;
 
 								if (blockState == NoiseChunkGenerator.AIR || SharedConstants.isOutsideGenerationArea(chunk.getPos())) {
 									continue;
@@ -169,6 +170,7 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 							}
 
 							if (horizontalWidthCellBlockIndexToSample < horizontalCellBlockCount) {
+								previousHorizontalWidthCellBlockIndexToSample = horizontalWidthCellBlockIndexToSample;
 								horizontalWidthCellBlockIndexToSample += qualityDrop;
 							}
 						}

@@ -1,5 +1,6 @@
 package io.github.steveplays28.noisium.mixin;
 
+import com.seibel.distanthorizons.api.DhApi;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
@@ -47,7 +48,7 @@ public abstract class TreeFeatureMixin {
 			return false;
 		}
 
-		if (Thread.currentThread().getName().startsWith("DH")) {
+		if (DhApi.isDhThread()) {
 			config.trunkPlacer.generate(world, trunkPlacerReplacer, random, topPosition, blockPos, config);
 			return true;
 		} else {
