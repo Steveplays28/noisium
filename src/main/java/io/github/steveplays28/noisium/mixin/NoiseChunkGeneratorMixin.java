@@ -48,12 +48,11 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 
 		chunkNoiseSampler.sampleStartDensity();
 
-		final int horizontalCellBlockCount = DhApi.isDhThread() ? 4 : chunkNoiseSampler.getHorizontalCellBlockCount();
+		final int horizontalCellBlockCount = DhApi.isDhThread() ? 16 : chunkNoiseSampler.getHorizontalCellBlockCount();
 		final int verticalCellBlockCount = chunkNoiseSampler.getVerticalCellBlockCount();
 		final int horizontalCellCount = 16 / horizontalCellBlockCount;
 		final var mutableBlockPos = new BlockPos.Mutable();
 
-		// TODO: Separate the vertical quality drop and lower it
 		int qualityDrop;
 		if (DhApi.isDhThread()) {
 			qualityDrop = 32;
@@ -89,7 +88,7 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 							chunkNoiseSampler.interpolateY(blockPosY, deltaY);
 						}
 
-						if (verticalCellBlockIndexToSample >= 0) {
+						if (verticalCellBlockIndexToSample > 0) {
 							previousVerticalCellBlockIndexToSample = verticalCellBlockIndexToSample;
 							verticalCellBlockIndexToSample = MathHelper.clamp(
 									verticalCellBlockIndexToSample - qualityDrop, 0, Integer.MAX_VALUE);
