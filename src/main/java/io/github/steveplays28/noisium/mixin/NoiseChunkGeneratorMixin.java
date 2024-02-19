@@ -1,7 +1,7 @@
 package io.github.steveplays28.noisium.mixin;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.block.BlockState;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Util;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.chunk.Chunk;
@@ -11,18 +11,15 @@ import net.minecraft.world.gen.chunk.*;
 import net.minecraft.world.gen.noise.NoiseConfig;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 @Mixin(NoiseChunkGenerator.class)
 public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
-	@Shadow
-	@Final
-	public RegistryEntry<ChunkGeneratorSettings> settings;
-
 	@Shadow
 	protected abstract Chunk populateNoise(Blender blender, StructureAccessor structureAccessor, NoiseConfig noiseConfig, Chunk chunk, int minimumCellY, int cellHeight);
 
@@ -54,44 +51,29 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 		return blockState;
 	}
 
-	/**
-	 * @author Steveplays28
-	 * @reason Micro-optimisation
-	 */
-	@Overwrite
 	@SuppressWarnings("ForLoopReplaceableByForEach")
-	public CompletableFuture<Chunk> populateNoise(Executor executor, Blender blender, NoiseConfig noiseConfig, StructureAccessor structureAccessor, Chunk chunk) {
-		GenerationShapeConfig generationShapeConfig = this.settings.value().generationShapeConfig().trimHeight(chunk.getHeightLimitView());
-		int minimumY = generationShapeConfig.minimumY();
-		int generationShapeHeightFloorDiv = Math.floorDiv(generationShapeConfig.height(), generationShapeConfig.verticalCellBlockCount());
-
-		if (generationShapeHeightFloorDiv <= 0) {
-			return CompletableFuture.completedFuture(chunk);
-		}
-
-		int minimumYFloorDiv = Math.floorDiv(minimumY, generationShapeConfig.verticalCellBlockCount());
-		int startingChunkSectionIndex = chunk.getSectionIndex(
-				generationShapeHeightFloorDiv * generationShapeConfig.verticalCellBlockCount() - 1 + minimumY);
-		int minimumYChunkSectionIndex = chunk.getSectionIndex(minimumY);
-		ArrayList<ChunkSection> chunkSections = new ArrayList<>();
+	@Inject(method = "populateNoise(Ljava/util/concurrent/Executor;Lnet/minecraft/world/gen/chunk/Blender;Lnet/minecraft/world/gen/noise/NoiseConfig;Lnet/minecraft/world/gen/StructureAccessor;Lnet/minecraft/world/chunk/Chunk;)Ljava/util/concurrent/CompletableFuture;", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/world/chunk/Chunk;getSectionIndex(I)I", ordinal = 1), cancellable = true)
+	private void noisium$populateNoiseInject(Executor executor, Blender blender, NoiseConfig noiseConfig, StructureAccessor structureAccessor, Chunk chunk, CallbackInfoReturnable<CompletableFuture<Chunk>> cir, @Local(ordinal = 1) int minimumYFloorDiv, @Local(ordinal = 2) int generationShapeHeightFloorDiv, @Local(ordinal = 3) int startingChunkSectionIndex, @Local(ordinal = 4) int minimumYChunkSectionIndex) {
+		ChunkSection[] chunkSections = new ChunkSection[startingChunkSectionIndex - minimumYChunkSectionIndex + 1];
 
 		for (int chunkSectionIndex = startingChunkSectionIndex; chunkSectionIndex >= minimumYChunkSectionIndex; --chunkSectionIndex) {
 			ChunkSection chunkSection = chunk.getSection(chunkSectionIndex);
 
 			chunkSection.lock();
-			chunkSections.add(chunkSection);
+			chunkSections[chunkSectionIndex] = chunkSection;
 		}
 
-		return CompletableFuture.supplyAsync(
-				Util.debugSupplier("wgen_fill_noise",
+		cir.setReturnValue(CompletableFuture.supplyAsync(
+				Util.debugSupplier(
+						"wgen_fill_noise",
 						() -> this.populateNoise(blender, structureAccessor, noiseConfig, chunk, minimumYFloorDiv,
 								generationShapeHeightFloorDiv
 						)
 				), Util.getMainWorkerExecutor()).whenCompleteAsync((chunk2, throwable) -> {
 			// Replace an enhanced for loop with a fori loop
-			for (int i = 0; i < chunkSections.size(); i++) {
-				chunkSections.get(i).unlock();
+			for (int i = 0; i < chunkSections.length; i++) {
+				chunkSections[i].unlock();
 			}
-		}, executor);
+		}, executor));
 	}
 }
