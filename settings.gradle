@@ -11,4 +11,4 @@ include("common")
 include("fabric")
 include("forge")
 
-rootProject.name = "noisium"
+rootProject.name = "${mod_id}"

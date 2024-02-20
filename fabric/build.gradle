@@ -2,12 +2,16 @@
 //file:noinspection GroovyAssignabilityCheck
 
 plugins {
-    id "com.github.johnrengelman.shadow" version "7.1.2"
+    id "com.github.johnrengelman.shadow" version "${shadow_plugin_version}"
 }
 
 architectury {
     platformSetupLoomIde()
     fabric()
+}
+
+base {
+    archivesName = "${rootProject.archives_base_name}-fabric"
 }
 
 loom {

@@ -2,12 +2,16 @@
 //file:noinspection GroovyAssignabilityCheck
 
 plugins {
-    id "com.github.johnrengelman.shadow" version "7.1.2"
+    id "com.github.johnrengelman.shadow" version "${shadow_plugin_version}"
 }
 
 architectury {
     platformSetupLoomIde()
     forge()
+}
+
+base {
+    archivesName = "${rootProject.archives_base_name}-forge"
 }
 
 loom {
@@ -17,8 +21,7 @@ loom {
         convertAccessWideners = true
         extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
 
-        mixinConfig "noisium-common.mixins.json"
-        mixinConfig "noisium.mixins.json"
+        mixinConfig "${mod_namespace}-common.mixins.json"
     }
 }
 
@@ -41,7 +44,7 @@ dependencies {
 }
 
 processResources {
-    inputs.property "version", project.version
+    inputs.property "version", "${project.version}-forge"
 
     filesMatching("META-INF/mods.toml") {
         expand "version": project.version,

@@ -2,8 +2,9 @@
 //file:noinspection GroovyAssignabilityCheck
 
 plugins {
-    id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "1.4-SNAPSHOT" apply false
+    id "architectury-plugin" version "${architectury_plugin_version}"
+    id "dev.architectury.loom" version "${architectury_loom_version}" apply false
+    id "io.github.pacifistmc.forgix" version "${forgix_plugin_version}"
 }
 
 architectury {
@@ -23,10 +24,6 @@ allprojects {
     apply plugin: "java"
     apply plugin: "architectury-plugin"
     apply plugin: "maven-publish"
-
-    base {
-        archivesName = rootProject.archives_base_name
-    }
 
     version = "${rootProject.mod_version}+mc${rootProject.supported_minecraft_version_name}"
     group = rootProject.maven_group
@@ -66,3 +63,18 @@ jar {
         rename { "${it}_${project.archivesBaseName}" }
     }
 }
+
+// Forgix settings
+// Forgix merges all modloader specific JARs into one JAR
+forgix {
+    group = "${rootProject.maven_group}_${rootProject.archives_base_name}"
+    mergedJarName = "${mod_id}-${version}.jar"
+}
+
+// Delete the project/build folder (containing near-empty JARs)
+tasks.register('deleteRootBuildFolder', Delete) {
+    delete "build/"
+}
+
+build.finalizedBy(mergeJars, deleteRootBuildFolder)
+assemble.finalizedBy(mergeJars, deleteRootBuildFolder)

@@ -5,6 +5,10 @@ architectury {
     common(rootProject.enabled_platforms.split(","))
 }
 
+base {
+    archivesName = "${rootProject.archives_base_name}-common"
+}
+
 loom {
     accessWidenerPath = file("src/main/resources/noisium.accesswidener")
 }

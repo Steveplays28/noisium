@@ -15,7 +15,7 @@ logoFile = "assets/${mod_namespace}/icon.png"
 displayURL = "https://github.com/Steveplays28/${mod_id}"
 
 [mc-publish]
-loaders = ["fabric", "quilt", "neoforge"]
+loaders = ["fabric", "quilt", "forge", "neoforge"]
 curseforge = "${curseforge_project_id}"
 modrinth = "${modrinth_project_id}"
 

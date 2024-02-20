@@ -24,6 +24,7 @@
       "loaders": [
         "fabric",
         "quilt",
+        "forge",
         "neoforge"
       ],
       "curseforge": "${curseforge_project_id}",
@@ -37,8 +38,7 @@
     ]
   },
   "mixins": [
-    "${mod_namespace}-common.mixins.json",
-    "${mod_namespace}.mixins.json"
+    "${mod_namespace}-common.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=${fabric_loader_version}",
