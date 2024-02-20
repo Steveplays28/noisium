@@ -71,10 +71,36 @@ forgix {
     mergedJarName = "${mod_id}-${version}.jar"
 }
 
-// Delete the project/build folder (containing near-empty JARs)
-tasks.register('deleteRootBuildFolder', Delete) {
-    delete "build/"
+// Move the merged JAR into the build/libs/ folder, overwriting any near-empty JARs previously there
+// Afterwards, delete the Merged/ folder
+tasks.register("moveMergedJar") {
+    dependsOn(mergeJars)
+
+    doLast {
+        delete "build/"
+        mkdir "build/libs/"
+        copy {
+            from "Merged/${forgix.mergedJarName}"
+            into "build/libs/"
+        }
+        delete "Merged/"
+    }
 }
 
-build.finalizedBy(mergeJars, deleteRootBuildFolder)
-assemble.finalizedBy(mergeJars, deleteRootBuildFolder)
+// Register a task that runs Forgix' mergeJars task and then the moveMergedJar task after all subprojects have been built
+tasks.register("mergeJarsAndMoveJar") {
+    dependsOn(subprojects.build)
+    finalizedBy(mergeJars, moveMergedJar)
+}
+
+// Run the clean task before building, to make sure Forgix doesn't use any JARs it shouldn't use
+// Run the mergeJarsAndMoveJar task after all subprojects have been built
+tasks.named("build") {
+    dependsOn(clean)
+    finalizedBy(mergeJarsAndMoveJar)
+}
+
+tasks.named("assemble") {
+    dependsOn(clean)
+    finalizedBy(mergeJarsAndMoveJar)
+}
