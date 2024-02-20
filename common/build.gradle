@@ -10,7 +10,7 @@ base {
 }
 
 loom {
-    accessWidenerPath = file("src/main/resources/noisium.accesswidener")
+    accessWidenerPath = file("src/main/resources/${mod_namespace}.accesswidener")
 }
 
 dependencies {

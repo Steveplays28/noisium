@@ -18,8 +18,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-import static io.github.steveplays28.noisium.Noisium.LOGGER;
-
 @Mixin(NoiseChunkGenerator.class)
 public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 	@Shadow
@@ -49,8 +47,6 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 				chunkSection.blockStateContainer.paletteProvider.computeIndex(chunkSectionBlockPosX, chunkSectionBlockPosY,
 						chunkSectionBlockPosZ
 				), blockStateId);
-
-		LOGGER.info("{}", blockState);
 
 		return blockState;
 	}
