@@ -1,4 +1,4 @@
-![Noisium icon](assets/icon/icon_128x128.png)
+![Noisium icon](docs/assets/icon/icon_128x128.png)
 
 # Noisium
 
@@ -40,26 +40,23 @@ No known incompatibilities at this time.
 
 ## Download
 
-[![GitHub](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@2/assets/cozy/available/github_vector.svg)](https://github.com/Steveplays28/noisium)
-[![Modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@2/assets/cozy/available/modrinth_vector.svg)](https://modrinth.com/mod/noisium)
-[![CurseForge](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@2/assets/cozy/available/curseforge_vector.svg)](https://www.curseforge.com/minecraft/mc-mods/noisium)
+[![GitHub](https://github.com/intergrav/devins-badges/raw/2dc967fc44dc73850eee42c133a55c8ffc5e30cb/assets/cozy/available/github_vector.svg)](https://github.com/Steveplays28/noisium)
+[![Modrinth](https://github.com/intergrav/devins-badges/raw/2dc967fc44dc73850eee42c133a55c8ffc5e30cb/assets/cozy/available/modrinth_vector.svg)](https://modrinth.com/mod/noisium)
+[![CurseForge](https://github.com/intergrav/devins-badges/raw/2dc967fc44dc73850eee42c133a55c8ffc5e30cb/assets/cozy/available/curseforge_vector.svg)](https://www.curseforge.com/minecraft/mc-mods/noisium)
 
-![Fabric](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@2/assets/compact/supported/fabric_vector.svg)
-![Quilt](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@2/assets/compact/supported/quilt_vector.svg)
+![Fabric](https://github.com/intergrav/devins-badges/raw/2dc967fc44dc73850eee42c133a55c8ffc5e30cb/assets/compact/supported/fabric_vector.svg)
+![Quilt](https://github.com/intergrav/devins-badges/raw/2dc967fc44dc73850eee42c133a55c8ffc5e30cb/assets/compact/supported/quilt_vector.svg)
+![Forge](https://github.com/intergrav/devins-badges/raw/2dc967fc44dc73850eee42c133a55c8ffc5e30cb/assets/compact/supported/forge_vector.svg)
+![NeoForge](docs/assets/badges/compact/supported/neoforge_vector.svg)
 
 See the version info in the filename for the supported Minecraft versions.  
-Made for the Fabric and Quilt modloaders.  
+Made for the Fabric, Quilt, Forge, and NeoForge modloaders. The `merged` JAR works on all modloaders.  
 Server side.
 
 ## FAQ
 
-![forge](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@2/assets/cozy/unsupported/forge_vector.svg)
-
 - Q: Will you be backporting this mod to lower Minecraft versions?  
   A: No.
-
-- Q: Will you port this mod to Forge?  
-  A: Also no.
 
 - Q: Does this mod work in multiplayer?  
   A: Yes, but it'll only improve performance on the server.
