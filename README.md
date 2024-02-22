@@ -50,7 +50,7 @@ No known incompatibilities at this time.
 ![NeoForge](docs/assets/badges/compact/supported/neoforge_vector.svg)
 
 See the version info in the filename for the supported Minecraft versions.  
-Made for the Fabric, Quilt, Forge, and NeoForge modloaders. The `merged` JAR works on all modloaders.  
+Made for the Fabric, Quilt, Forge, and NeoForge modloaders. The `merged` JAR works on aforementioned all modloaders.  
 Server side.
 
 ## FAQ
