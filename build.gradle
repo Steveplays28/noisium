@@ -67,8 +67,8 @@ jar {
 // Forgix settings
 // Forgix merges all modloader specific JARs into one JAR
 forgix {
-    group = "${rootProject.maven_group}_${rootProject.archives_base_name}"
-    mergedJarName = "${mod_id}-merged-${version}.jar"
+    group = "${rootProject.maven_group}.${rootProject.archives_base_name}"
+    mergedJarName = "${rootProject.mod_id}-merged-${rootProject.version}.jar"
     outputDir = "build/libs/"
 }
 
