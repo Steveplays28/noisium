@@ -69,44 +69,38 @@ jar {
 forgix {
     group = "${rootProject.maven_group}_${rootProject.archives_base_name}"
     mergedJarName = "${mod_id}-merged-${version}.jar"
+    outputDir = "build/libs/"
 }
 
 // Move the merged JAR into the build/libs/ folder, overwriting any near-empty JARs previously there
 // Afterwards, delete the Merged/ folder
-tasks.register("moveMergedJar") {
-    dependsOn(mergeJars)
-
+tasks.register("cleanRootBuildDirectory") {
     doLast {
         delete "build/"
         mkdir "build/libs/"
-        copy {
-            from "Merged/${forgix.mergedJarName}"
-            into "build/libs/"
-        }
-        delete "Merged/"
     }
 }
 
 // Register a task that runs Forgix' mergeJars task and then the moveMergedJar task after all subprojects have been built
-tasks.register("mergeJarsAndMoveJar") {
+tasks.register("mergeJarsAfterSubprojectsBuild") {
     dependsOn(subprojects.build)
-    finalizedBy(mergeJars, moveMergedJar)
+    finalizedBy(mergeJars)
 }
 
+// Run the cleanRootBuildDirectory task before merging JARs using Forgix, to make sure GitHub Actions doesn't upload any unused build results and to prevent confusion
 tasks.named("mergeJars") {
-    finalizedBy(moveMergedJar)
+    dependsOn(cleanRootBuildDirectory)
 }
 
 // Run the clean task before building, to make sure Forgix doesn't use any JARs it shouldn't use
-// Run the mergeJarsAndMoveJar task after all subprojects have been built
 tasks.named("build") {
     dependsOn(clean, subprojects.clean)
-    finalizedBy(mergeJarsAndMoveJar)
+    finalizedBy(mergeJarsAfterSubprojectsBuild)
 }
 
 tasks.named("assemble") {
     dependsOn(clean, subprojects.clean)
-    finalizedBy(mergeJarsAndMoveJar)
+    finalizedBy(mergeJarsAfterSubprojectsBuild)
 }
 
 publishing {
