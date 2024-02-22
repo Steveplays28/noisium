@@ -100,12 +100,12 @@ tasks.named("mergeJars") {
 // Run the clean task before building, to make sure Forgix doesn't use any JARs it shouldn't use
 // Run the mergeJarsAndMoveJar task after all subprojects have been built
 tasks.named("build") {
-    dependsOn(clean)
+    dependsOn(clean, subprojects.clean)
     finalizedBy(mergeJarsAndMoveJar)
 }
 
 tasks.named("assemble") {
-    dependsOn(clean)
+    dependsOn(clean, subprojects.clean)
     finalizedBy(mergeJarsAndMoveJar)
 }
 
