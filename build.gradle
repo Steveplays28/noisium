@@ -68,7 +68,7 @@ jar {
 // Forgix merges all modloader specific JARs into one JAR
 forgix {
     group = "${rootProject.maven_group}_${rootProject.archives_base_name}"
-    mergedJarName = "${mod_id}-${version}.jar"
+    mergedJarName = "${mod_id}-merged-${version}.jar"
 }
 
 // Move the merged JAR into the build/libs/ folder, overwriting any near-empty JARs previously there
@@ -91,6 +91,10 @@ tasks.register("moveMergedJar") {
 tasks.register("mergeJarsAndMoveJar") {
     dependsOn(subprojects.build)
     finalizedBy(mergeJars, moveMergedJar)
+}
+
+tasks.named("mergeJars") {
+    finalizedBy(moveMergedJar)
 }
 
 // Run the clean task before building, to make sure Forgix doesn't use any JARs it shouldn't use
