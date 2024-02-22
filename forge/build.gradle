@@ -5,13 +5,15 @@ plugins {
     id "com.github.johnrengelman.shadow" version "${shadow_plugin_version}"
 }
 
+def archivesNameForge = "${rootProject.archives_base_name}-forge"
+
 architectury {
     platformSetupLoomIde()
     forge()
 }
 
 base {
-    archivesName = "${rootProject.archives_base_name}-forge"
+    archivesName = archivesNameForge
 }
 
 loom {
@@ -87,14 +89,21 @@ components.java {
 
 publishing {
     publications {
-        mavenForge(MavenPublication) {
-            artifactId = rootProject.archives_base_name + "-" + project.name
+        mavenJava(MavenPublication) {
+            groupId = rootProject.maven_group
+            artifactId = archivesNameForge
             from components.java
         }
     }
 
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
     repositories {
-        // Add repositories to publish to here.
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/Steveplays28/${rootProject.mod_id}")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
     }
 }
