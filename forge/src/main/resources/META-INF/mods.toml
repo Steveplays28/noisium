@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[${neoforge_version})"
+loaderVersion = ">=${neoforge_version}"
 license = "${mod_license}"
 issueTrackerURL = "https://github.com/Steveplays28/${mod_id}/issues"
 
@@ -22,7 +22,7 @@ modrinth = "${modrinth_project_id}"
 [[dependencies.noisium]]
 modId = "forge"
 mandatory = true
-versionRange = "[${neoforge_version})"
+versionRange = ">=${neoforge_version}"
 ordering = "NONE"
 side = "BOTH"
 
