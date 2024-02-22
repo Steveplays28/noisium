@@ -55,4 +55,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: compiled_jar_files
-          path: **/build/libs/
+          path: "**/build/libs/"
