@@ -1,0 +1,12 @@
+accessWidener v2 named
+
+accessible field net/minecraft/world/chunk/ChunkSection blockStateContainer Lnet/minecraft/world/chunk/PalettedContainer;
+accessible field net/minecraft/world/chunk/ChunkSection nonEmptyBlockCount S
+accessible field net/minecraft/world/chunk/ChunkSection nonEmptyFluidCount S
+accessible field net/minecraft/world/chunk/ChunkSection randomTickableBlockCount S
+
+accessible field net/minecraft/world/chunk/PalettedContainer data Lnet/minecraft/world/chunk/PalettedContainer$Data;
+accessible field net/minecraft/world/chunk/PalettedContainer paletteProvider Lnet/minecraft/world/chunk/PalettedContainer$PaletteProvider;
+
+accessible class net/minecraft/world/chunk/PalettedContainer$Data
+accessible field net/minecraft/world/chunk/PalettedContainer$Data palette Lnet/minecraft/world/chunk/Palette;

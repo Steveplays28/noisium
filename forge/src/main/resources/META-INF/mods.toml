@@ -1,0 +1,34 @@
+modLoader = "javafml"
+loaderVersion = "[${neoforge_version})"
+license = "${mod_license}"
+issueTrackerURL = "https://github.com/Steveplays28/${mod_id}/issues"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${version}"
+displayName = "${mod_name}"
+authors = "Steveplays28"
+description = '''
+${mod_description}
+'''
+logoFile = "assets/${mod_namespace}/icon.png"
+displayURL = "https://github.com/Steveplays28/${mod_id}"
+
+[mc-publish]
+loaders = ["fabric", "quilt", "forge", "neoforge"]
+curseforge = "${curseforge_project_id}"
+modrinth = "${modrinth_project_id}"
+
+[[dependencies.noisium]]
+modId = "forge"
+mandatory = true
+versionRange = "[${neoforge_version})"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.noisium]]
+modId = "minecraft"
+mandatory = true
+versionRange = "${supported_minecraft_version}"
+ordering = "NONE"
+side = "BOTH"

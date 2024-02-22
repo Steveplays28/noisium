@@ -7,6 +7,9 @@ jobs:
   build_and_publish:
     name: Build and publish
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - uses: actions/checkout@v3
@@ -48,7 +51,12 @@ jobs:
       - name: Execute Gradle build
         run: ./gradlew build
 
-      # https://github.com/marketplace/actions/publish-minecraft-mods
+      - name: Publish mod to Maven repository
+        run: ./gradlew publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # https://github.com/marketplace/actions/mc-publish
       - name: Publish mod
         uses: Kir-Antipov/mc-publish@v3.3
         with:
@@ -63,8 +71,9 @@ jobs:
 
           name: ${{ steps.mod_version.outputs.value }} (${{ steps.supported_minecraft_version.outputs.value }})
           github-tag: v${{ steps.mod_version.outputs.value }}+mc${{ steps.supported_minecraft_version.outputs.value }}
-          files-primary: build/libs/!(*-@(dev|sources|javadoc)).jar
-          files-secondary: build/libs/*-@(dev|sources|javadoc).jar
+          files: |
+            build/libs/!(*-@(dev|sources|javadoc)).jar
+            build/libs/*-@(dev|sources|javadoc).jar
           version-type: release
           modrinth-featured: false
           changelog-file: CHANGELOG_LATEST.md

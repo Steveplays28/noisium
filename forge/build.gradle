@@ -1,0 +1,109 @@
+//file:noinspection GroovyAccessibility
+//file:noinspection GroovyAssignabilityCheck
+
+plugins {
+    id "com.github.johnrengelman.shadow" version "${shadow_plugin_version}"
+}
+
+def archivesNameForge = "${rootProject.archives_base_name}-forge"
+
+architectury {
+    platformSetupLoomIde()
+    forge()
+}
+
+base {
+    archivesName = archivesNameForge
+}
+
+loom {
+    accessWidenerPath = project(":common").loom.accessWidenerPath
+
+    forge {
+        convertAccessWideners = true
+        extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
+
+        mixinConfig "${mod_namespace}-common.mixins.json"
+    }
+}
+
+configurations {
+    common
+    shadowCommon // Don't use shadow from the shadow plugin since it *excludes* files.
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentForge.extendsFrom common
+}
+
+dependencies {
+    forge "net.neoforged:forge:${rootProject.minecraft_version}-${rootProject.neoforge_version}"
+
+    // Mixin Extras
+    include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-forge:${project.mixin_extras_version}")))
+
+    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+}
+
+processResources {
+    inputs.property "version", "${project.version}-forge"
+
+    filesMatching("META-INF/mods.toml") {
+        expand "version": project.version,
+                "mod_id": rootProject.mod_id,
+                "mod_namespace": rootProject.mod_namespace,
+                "mod_name": rootProject.mod_name,
+                "mod_description": rootProject.mod_description,
+                "mod_license": rootProject.mod_license,
+                "curseforge_project_id": rootProject.curseforge_project_id,
+                "modrinth_project_id": rootProject.modrinth_project_id,
+                "neoforge_version": rootProject.neoforge_version,
+                "supported_minecraft_version": rootProject.supported_minecraft_version
+    }
+}
+
+shadowJar {
+    exclude "fabric.mod.json"
+    exclude "architectury.common.json"
+
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier = "dev-shadow"
+}
+
+remapJar {
+    inputFile.set shadowJar.archiveFile
+    dependsOn shadowJar
+}
+
+sourcesJar {
+    def commonSources = project(":common").sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+}
+
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = rootProject.maven_group
+            artifactId = archivesNameForge
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/Steveplays28/${rootProject.mod_id}")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+}

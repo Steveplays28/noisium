@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "authors": [
+    "Steveplays28"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/${mod_id}",
+    "sources": "https://github.com/Steveplays28/${mod_id}",
+    "issues": "https://github.com/Steveplays28/${mod_id}/issues"
+  },
+  "license": "${mod_license}",
+  "icon": "assets/${mod_namespace}/icon.png",
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://discord.gg/KbWxgGg"
+      }
+    },
+    "mc-publish": {
+      "loaders": [
+        "fabric",
+        "quilt",
+        "forge",
+        "neoforge"
+      ],
+      "curseforge": "${curseforge_project_id}",
+      "modrinth": "${modrinth_project_id}"
+    }
+  },
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.github.steveplays28.noisium.fabric.NoisiumFabric"
+    ]
+  },
+  "mixins": [
+    "${mod_namespace}-common.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${fabric_loader_version}",
+    "minecraft": "${supported_minecraft_version}"
+  },
+  "suggests": {
+    "c2me": "*"
+  }
+}
