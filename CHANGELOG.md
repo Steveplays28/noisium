@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Forge support
 - NeoForge support
+- `GenerationShapeConfig` caching optimisation
+    - `horizontalCellBlockCount` and `verticalCellBlockCount` are now cached, which skips a `BiomeCoords#toBlock` call every time these
+      methods are invoked
 
 ## `v1.0.2` - 12/11/2023
 
@@ -23,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Removed the biome population multithreading
-  - See the C2ME recommendation above
+    - See the C2ME recommendation above
 
 ### Fixed
 
