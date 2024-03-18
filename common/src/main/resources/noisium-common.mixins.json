@@ -7,7 +7,9 @@
     "ChainedBlockSourceMixin",
     "ChunkSectionMixin",
     "GenerationShapeConfigMixin",
-    "NoiseChunkGeneratorMixin"
+    "NoiseChunkGeneratorMixin",
+    "ServerWorldMixin",
+    "world.WorldMixin"
   ],
   "client": [
   ],
