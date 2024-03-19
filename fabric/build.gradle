@@ -34,6 +34,9 @@ dependencies {
     // Mixin Extras
     include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:${project.mixin_extras_version}")))
 
+    // Architectury API
+    modApi("dev.architectury:architectury:${rootProject.architectury_api_version}")
+
     // Fabric API
     modRuntimeOnly "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 

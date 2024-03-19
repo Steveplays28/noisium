@@ -41,6 +41,9 @@ dependencies {
     // Mixin Extras
     include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-forge:${project.mixin_extras_version}")))
 
+    // Architectury API
+    modApi("dev.architectury:architectury:${rootProject.architectury_api_version}")
+
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 }

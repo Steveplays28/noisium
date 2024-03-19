@@ -1,4 +1,4 @@
-package io.github.steveplays28.noisium.mixin;
+package io.github.steveplays28.noisium.mixin.server.world;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.datafixers.DataFixer;

@@ -2,13 +2,13 @@ package io.github.steveplays28.noisium.server.world;
 
 import com.mojang.datafixers.DataFixer;
 import io.github.steveplays28.noisium.Noisium;
+import io.github.steveplays28.noisium.util.world.chunk.ChunkUtil;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.ChunkSerializer;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ProtoChunk;
 import net.minecraft.world.chunk.UpgradeData;
 import net.minecraft.world.chunk.WorldChunk;
@@ -19,12 +19,19 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class NoisiumServerWorldChunkManager {
 	private final ServerWorld serverWorld;
 	private final ChunkGenerator chunkGenerator;
 	private final PointOfInterestStorage pointOfInterestStorage;
 	private final VersionedChunkStorage versionedChunkStorage;
+	private final Executor threadPoolExecutor;
+	private final Map<ChunkPos, WorldChunk> loadedWorldChunks;
 
 	public NoisiumServerWorldChunkManager(@NotNull ServerWorld serverWorld, @NotNull ChunkGenerator chunkGenerator, @NotNull Path worldDirectoryPath, DataFixer dataFixer) {
 		this.serverWorld = serverWorld;
@@ -33,9 +40,22 @@ public class NoisiumServerWorldChunkManager {
 		this.pointOfInterestStorage = new PointOfInterestStorage(
 				worldDirectoryPath.resolve("poi"), dataFixer, true, serverWorld.getRegistryManager(), serverWorld);
 		this.versionedChunkStorage = new NoisiumServerVersionedChunkStorage(worldDirectoryPath.resolve("region"), dataFixer, true);
+		this.threadPoolExecutor = Executors.newFixedThreadPool(5);
+		this.loadedWorldChunks = new HashMap<>();
 	}
 
-	public Chunk getChunk(ChunkPos chunkPos) {
+	/**
+	 * Loads the chunk at the specified position, returning the loaded chunk when done. Returns the chunk from the <code>loadedChunks</code> cache if available.
+	 *
+	 * @param chunkPos The position at which to load the chunk.
+	 * @return The loaded chunk.
+	 */
+	@Nullable
+	public WorldChunk getChunk(ChunkPos chunkPos) {
+		if (loadedWorldChunks.containsKey(chunkPos)) {
+			return loadedWorldChunks.get(chunkPos);
+		}
+
 		ProtoChunk protoChunk;
 		var fetchedNbtData = getNbtDataAtChunkPosition(chunkPos);
 		if (fetchedNbtData == null) {
@@ -48,10 +68,22 @@ public class NoisiumServerWorldChunkManager {
 		}
 
 		// TODO: Mark chunk as tickable
-		protoChunk = ChunkSerializer.deserialize(serverWorld, pointOfInterestStorage, chunkPos, fetchedNbtData);
-		return new WorldChunk(serverWorld, protoChunk,
-				chunkToAddEntitiesTo -> serverWorld.addEntities(EntityType.streamFromNbt(protoChunk.getEntities(), serverWorld))
-		);
+		var chunkFuture = CompletableFuture.supplyAsync(
+				() -> ChunkSerializer.deserialize(serverWorld, pointOfInterestStorage, chunkPos, fetchedNbtData));
+
+		try {
+			var fetchedChunk = chunkFuture.get();
+			var fetchedWorldChunk = new WorldChunk(serverWorld, fetchedChunk,
+					chunkToAddEntitiesTo -> serverWorld.addEntities(EntityType.streamFromNbt(fetchedChunk.getEntities(), serverWorld))
+			);
+
+			loadedWorldChunks.put(chunkPos, fetchedWorldChunk);
+			ChunkUtil.sendWorldChunkToPlayer(serverWorld, fetchedWorldChunk);
+			return fetchedWorldChunk;
+		} catch (Exception ex) {
+			// TODO
+			return null;
+		}
 	}
 
 	private @Nullable NbtCompound getNbtDataAtChunkPosition(ChunkPos chunkPos) {

@@ -1,5 +1,6 @@
 package io.github.steveplays28.noisium;
 
+import io.github.steveplays28.noisium.server.world.NoisiumServerInitialiser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,5 +11,7 @@ public class Noisium {
 
 	public static void initialize() {
 		LOGGER.info("Loading {}.", MOD_NAME);
+
+		NoisiumServerInitialiser.initialise();
 	}
 }

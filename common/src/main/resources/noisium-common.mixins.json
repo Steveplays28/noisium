@@ -8,7 +8,8 @@
     "ChunkSectionMixin",
     "GenerationShapeConfigMixin",
     "NoiseChunkGeneratorMixin",
-    "ServerWorldMixin",
+    "server.world.ServerChunkManagerMixin",
+    "server.world.ServerWorldMixin",
     "world.WorldMixin"
   ],
   "client": [
