@@ -7,6 +7,7 @@
     "ChainedBlockSourceMixin",
     "ChunkSectionMixin",
     "GenerationShapeConfigMixin",
+    "server.MinecraftServerMixin",
     "NoiseChunkGeneratorMixin",
     "server.world.ServerChunkManagerMixin",
     "server.world.ServerWorldMixin",

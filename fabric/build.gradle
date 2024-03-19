@@ -35,7 +35,7 @@ dependencies {
     include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:${project.mixin_extras_version}")))
 
     // Architectury API
-    modApi("dev.architectury:architectury:${rootProject.architectury_api_version}")
+    modRuntimeOnly("dev.architectury:architectury-fabric:${rootProject.architectury_api_version}") { exclude group: 'net.fabricmc', module: 'fabric-loader' }
 
     // Fabric API
     modRuntimeOnly "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
@@ -60,7 +60,8 @@ processResources {
                 "curseforge_project_id": rootProject.curseforge_project_id,
                 "modrinth_project_id": rootProject.modrinth_project_id,
                 "fabric_loader_version": rootProject.fabric_loader_version,
-                "supported_minecraft_version": rootProject.supported_minecraft_version
+                "supported_minecraft_version": rootProject.supported_minecraft_version,
+                "architectury_api_version": rootProject.architectury_api_version
     }
 }
 

@@ -22,7 +22,7 @@ dependencies {
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${rootProject.mixin_extras_version}"))
 
     // Architectury API
-    modApi("dev.architectury:architectury:${rootProject.architectury_api_version}")
+    modApi("dev.architectury:architectury:${rootProject.architectury_api_version}") { exclude group: 'net.fabricmc', module: 'fabric-loader' }
 }
 
 publishing {

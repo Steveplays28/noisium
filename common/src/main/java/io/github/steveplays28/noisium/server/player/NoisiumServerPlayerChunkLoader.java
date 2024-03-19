@@ -27,7 +27,6 @@ public class NoisiumServerPlayerChunkLoader {
 		for (int i = 0; i < players.size(); i++) {
 			var playerBlockPos = players.get(i).getBlockPos();
 			if (!playerBlockPos.equals(previousTickPlayers.get(i).getBlockPos())) {
-				// TODO: Add lightProvider reference
 				ChunkUtil.sendWorldChunkToPlayer(
 						serverWorld, worldChunkSupplier.apply(new ChunkPos(playerBlockPos.getX(), playerBlockPos.getZ())));
 			}

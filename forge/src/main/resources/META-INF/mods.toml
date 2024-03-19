@@ -32,3 +32,10 @@ mandatory = true
 versionRange = "${supported_minecraft_version}"
 ordering = "NONE"
 side = "BOTH"
+
+[[dependencies.noisium]]
+modId = "architectury"
+mandatory = true
+versionRange = ">=${architectury_api_version}"
+ordering = "NONE"
+side = "BOTH"

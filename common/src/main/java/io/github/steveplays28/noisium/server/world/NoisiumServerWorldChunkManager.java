@@ -31,7 +31,7 @@ public class NoisiumServerWorldChunkManager {
 	private final PointOfInterestStorage pointOfInterestStorage;
 	private final VersionedChunkStorage versionedChunkStorage;
 	private final Executor threadPoolExecutor;
-	private final Map<ChunkPos, WorldChunk> loadedWorldChunks;
+	public final Map<ChunkPos, WorldChunk> loadedWorldChunks;
 
 	public NoisiumServerWorldChunkManager(@NotNull ServerWorld serverWorld, @NotNull ChunkGenerator chunkGenerator, @NotNull Path worldDirectoryPath, DataFixer dataFixer) {
 		this.serverWorld = serverWorld;
@@ -84,6 +84,25 @@ public class NoisiumServerWorldChunkManager {
 			// TODO
 			return null;
 		}
+	}
+
+	/**
+	 * Gets all {@link WorldChunk}s around the specified chunk, using a square radius.
+	 *
+	 * @param chunkPos The center {@link ChunkPos}.
+	 * @param radius   A square radius of chunks.
+	 * @return All the {@link WorldChunk}s around the specified chunk, using a square radius.
+	 */
+	public @NotNull Map<@NotNull ChunkPos, @Nullable WorldChunk> getChunksInRadius(@NotNull ChunkPos chunkPos, int radius) {
+		var chunks = new HashMap<@NotNull ChunkPos, @Nullable WorldChunk>();
+
+		for (int chunkPosX = chunkPos.x - radius; chunkPosX < chunkPos.x + radius; chunkPosX++) {
+			for (int chunkPosZ = chunkPos.z - radius; chunkPosZ < chunkPos.z + radius; chunkPosZ++) {
+				chunks.put(new ChunkPos(chunkPosX, chunkPosZ), getChunk(chunkPos));
+			}
+		}
+
+		return chunks;
 	}
 
 	private @Nullable NbtCompound getNbtDataAtChunkPosition(ChunkPos chunkPos) {
