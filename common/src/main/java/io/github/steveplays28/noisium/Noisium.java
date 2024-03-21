@@ -1,6 +1,5 @@
 package io.github.steveplays28.noisium;
 
-import dev.architectury.event.events.common.LifecycleEvent;
 import io.github.steveplays28.noisium.server.world.NoisiumServerInitialiser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +13,5 @@ public class Noisium {
 		LOGGER.info("Loading {}.", MOD_NAME);
 
 		NoisiumServerInitialiser.initialise();
-		LifecycleEvent.SETUP.register(() -> {
-			LOGGER.info("hi from setup - Noisium");
-		});
 	}
 }
