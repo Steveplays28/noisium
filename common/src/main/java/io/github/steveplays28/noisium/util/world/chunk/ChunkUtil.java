@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.BitSet;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class ChunkUtil {
 	/**
@@ -28,13 +28,45 @@ public class ChunkUtil {
 		}
 	}
 
-	public static void sendWorldChunksToPlayer(@NotNull ServerWorld serverWorld, @NotNull Map<ChunkPos, WorldChunk> worldChunks) {
+	/**
+	 * Sends a {@link List} of {@link WorldChunk}s to all players in the specified world.
+	 * WARNING: This method blocks the server thread. Prefer using {@link ChunkUtil#sendWorldChunksToPlayerAsync(ServerWorld, List)} instead.
+	 *
+	 * @param serverWorld The world the {@link WorldChunk} resides in.
+	 * @param worldChunks The {@link List} of {@link WorldChunk}s.
+	 */
+	@SuppressWarnings("ForLoopReplaceableByForEach")
+	public static void sendWorldChunksToPlayer(@NotNull ServerWorld serverWorld, @NotNull List<WorldChunk> worldChunks) {
 		// TODO: Send a whole batch of chunks to the player at once to save on network traffic
-		for (var worldChunk : worldChunks.values()) {
-			sendWorldChunkToPlayer(serverWorld, worldChunk);
+		for (int i = 0; i < worldChunks.size(); i++) {
+			sendWorldChunkToPlayer(serverWorld, worldChunks.get(i));
 		}
 	}
 
+	/**
+	 * Sends a {@link List} of {@link CompletableFuture<WorldChunk>}s to all players in the specified world.
+	 * This method is ran asynchronously.
+	 *
+	 * @param serverWorld       The world the {@link WorldChunk} resides in.
+	 * @param worldChunkFutures The {@link List} of {@link CompletableFuture<WorldChunk>}s
+	 */
+	@SuppressWarnings("ForLoopReplaceableByForEach")
+	public static void sendWorldChunksToPlayerAsync(@NotNull ServerWorld serverWorld, @NotNull List<CompletableFuture<WorldChunk>> worldChunkFutures) {
+		// TODO: Send a whole batch of chunks to the player at once to save on network traffic
+		for (int i = 0; i < worldChunkFutures.size(); i++) {
+			worldChunkFutures.get(i).whenCompleteAsync((worldChunk, throwable) -> sendWorldChunkToPlayer(serverWorld, worldChunk));
+		}
+	}
+
+	/**
+	 * Sends a light update to a {@link List} of players.
+	 *
+	 * @param players          The {@link List} of players.
+	 * @param lightingProvider The {@link LightingProvider} of the world.
+	 * @param chunkPos         The {@link ChunkPos} at which the light update happened.
+	 * @param skyLightBits     The skylight {@link BitSet}.
+	 * @param blockLightBits   The blocklight {@link BitSet}.
+	 */
 	@SuppressWarnings("ForLoopReplaceableByForEach")
 	public static void sendLightUpdateToPlayers(@NotNull List<ServerPlayerEntity> players, LightingProvider lightingProvider, ChunkPos chunkPos, BitSet skyLightBits, BitSet blockLightBits) {
 		for (int i = 0; i < players.size(); i++) {

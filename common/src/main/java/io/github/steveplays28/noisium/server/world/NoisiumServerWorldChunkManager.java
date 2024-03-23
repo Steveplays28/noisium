@@ -1,5 +1,6 @@
 package io.github.steveplays28.noisium.server.world;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.datafixers.DataFixer;
 import io.github.steveplays28.noisium.Noisium;
 import io.github.steveplays28.noisium.server.world.chunk.ServerChunkData;
@@ -21,6 +22,7 @@ import net.minecraft.world.chunk.light.LightSourceView;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.poi.PointOfInterestStorage;
 import net.minecraft.world.storage.VersionedChunkStorage;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,7 +49,8 @@ public class NoisiumServerWorldChunkManager implements ChunkProvider {
 		this.pointOfInterestStorage = new PointOfInterestStorage(
 				worldDirectoryPath.resolve("poi"), dataFixer, true, serverWorld.getRegistryManager(), serverWorld);
 		this.versionedChunkStorage = new NoisiumServerVersionedChunkStorage(worldDirectoryPath.resolve("region"), dataFixer, true);
-		this.threadPoolExecutor = Executors.newFixedThreadPool(5);
+		this.threadPoolExecutor = Executors.newFixedThreadPool(
+				1, new ThreadFactoryBuilder().setNameFormat("Noisium Server World Chunk Manager %d").build());
 		this.loadedWorldChunks = new HashMap<>();
 	}
 
@@ -87,48 +90,93 @@ public class NoisiumServerWorldChunkManager implements ChunkProvider {
 
 	/**
 	 * Loads the chunk at the specified position, returning the loaded chunk when done. Returns the chunk from the <code>loadedChunks</code> cache if available.
+	 * This method is ran asynchronously.
 	 *
 	 * @param chunkPos The position at which to load the chunk.
 	 * @return The loaded chunk.
 	 */
-	@Nullable
-	public WorldChunk getChunk(ChunkPos chunkPos) {
+	public @NotNull CompletableFuture<WorldChunk> getChunkAsync(ChunkPos chunkPos) {
+		if (loadedWorldChunks.containsKey(chunkPos)) {
+			return CompletableFuture.completedFuture(loadedWorldChunks.get(chunkPos).worldChunk());
+		}
+
+		return CompletableFuture.supplyAsync(() -> {
+			var fetchedNbtData = getNbtDataAtChunkPosition(chunkPos);
+			if (fetchedNbtData == null) {
+				// TODO: Schedule ProtoChunk worldgen and update loadedWorldChunks incrementally during worldgen steps
+				return null;
+			}
+
+			var fetchedChunk = ChunkSerializer.deserialize(serverWorld, pointOfInterestStorage, chunkPos, fetchedNbtData);
+			return new WorldChunk(serverWorld, fetchedChunk,
+					chunkToAddEntitiesTo -> serverWorld.addEntities(EntityType.streamFromNbt(fetchedChunk.getEntities(), serverWorld))
+			);
+		}, threadPoolExecutor).whenComplete((fetchedWorldChunk, throwable) -> {
+			if (throwable != null) {
+				Noisium.LOGGER.error("Exception thrown while getting a chunk asynchronously:\n{}", ExceptionUtils.getStackTrace(throwable));
+			}
+
+			fetchedWorldChunk.addChunkTickSchedulers(serverWorld);
+			loadedWorldChunks.put(chunkPos, new ServerChunkData(fetchedWorldChunk, (short) 0, new BitSet(), new BitSet()));
+		});
+	}
+
+	/**
+	 * Loads the chunk at the specified position, returning the loaded chunk when done. Returns the chunk from the <code>loadedChunks</code> cache if available.
+	 * WARNING: This method blocks the server thread. Prefer using {@link NoisiumServerWorldChunkManager#getChunk(int, int)} instead.
+	 *
+	 * @param chunkPos The position at which to load the chunk.
+	 * @return The loaded chunk.
+	 */
+	public @Nullable WorldChunk getChunk(ChunkPos chunkPos) {
 		if (loadedWorldChunks.containsKey(chunkPos)) {
 			return loadedWorldChunks.get(chunkPos).worldChunk();
 		}
 
-		ProtoChunk protoChunk;
 		var fetchedNbtData = getNbtDataAtChunkPosition(chunkPos);
 		if (fetchedNbtData == null) {
 			// TODO: Schedule ProtoChunk worldgen and update loadedWorldChunks incrementally during worldgen steps
-			protoChunk = new ProtoChunk(
+			var protoChunk = new ProtoChunk(
 					chunkPos, UpgradeData.NO_UPGRADE_DATA, serverWorld, serverWorld.getRegistryManager().get(RegistryKeys.BIOME), null);
 			return new WorldChunk(serverWorld, protoChunk,
 					chunkToAddEntitiesTo -> serverWorld.addEntities(EntityType.streamFromNbt(protoChunk.getEntities(), serverWorld))
 			);
 		}
 
-		var chunkFuture = CompletableFuture.supplyAsync(
-				() -> ChunkSerializer.deserialize(serverWorld, pointOfInterestStorage, chunkPos, fetchedNbtData));
+		var fetchedChunk = ChunkSerializer.deserialize(serverWorld, pointOfInterestStorage, chunkPos, fetchedNbtData);
+		var fetchedWorldChunk = new WorldChunk(serverWorld, fetchedChunk,
+				chunkToAddEntitiesTo -> serverWorld.addEntities(EntityType.streamFromNbt(fetchedChunk.getEntities(), serverWorld))
+		);
+		fetchedWorldChunk.addChunkTickSchedulers(serverWorld);
 
-		try {
-			var fetchedChunk = chunkFuture.get();
-			var fetchedWorldChunk = new WorldChunk(serverWorld, fetchedChunk,
-					chunkToAddEntitiesTo -> serverWorld.addEntities(EntityType.streamFromNbt(fetchedChunk.getEntities(), serverWorld))
-			);
-			fetchedWorldChunk.addChunkTickSchedulers(serverWorld);
-
-			loadedWorldChunks.put(chunkPos, new ServerChunkData(fetchedWorldChunk, (short) 0, new BitSet(), new BitSet()));
-			ChunkUtil.sendWorldChunkToPlayer(serverWorld, fetchedWorldChunk);
-			return fetchedWorldChunk;
-		} catch (Exception ex) {
-			// TODO
-			return null;
-		}
+		loadedWorldChunks.put(chunkPos, new ServerChunkData(fetchedWorldChunk, (short) 0, new BitSet(), new BitSet()));
+		return fetchedWorldChunk;
 	}
 
 	/**
 	 * Gets all {@link WorldChunk}s around the specified chunk, using a square radius.
+	 * This method is ran asynchronously.
+	 *
+	 * @param chunkPos The center {@link ChunkPos}.
+	 * @param radius   A square radius of chunks.
+	 * @return All the {@link WorldChunk}s around the specified chunk, using a square radius.
+	 */
+	public @NotNull Map<@NotNull ChunkPos, @Nullable CompletableFuture<WorldChunk>> getChunksInRadiusAsync(@NotNull ChunkPos chunkPos, int radius) {
+		var chunks = new HashMap<@NotNull ChunkPos, @Nullable CompletableFuture<WorldChunk>>();
+
+		for (int chunkPosX = chunkPos.x - radius; chunkPosX < chunkPos.x + radius; chunkPosX++) {
+			for (int chunkPosZ = chunkPos.z - radius; chunkPosZ < chunkPos.z + radius; chunkPosZ++) {
+				var chunkPosThatShouldBeLoaded = new ChunkPos(chunkPosX, chunkPosZ);
+				chunks.put(chunkPosThatShouldBeLoaded, getChunkAsync(chunkPosThatShouldBeLoaded));
+			}
+		}
+
+		return chunks;
+	}
+
+	/**
+	 * Gets all {@link WorldChunk}s around the specified chunk, using a square radius.
+	 * WARNING: This method blocks the server thread. Prefer using {@link NoisiumServerWorldChunkManager#getChunksInRadiusAsync(ChunkPos, int)} instead.
 	 *
 	 * @param chunkPos The center {@link ChunkPos}.
 	 * @param radius   A square radius of chunks.
