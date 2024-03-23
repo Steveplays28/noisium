@@ -24,7 +24,7 @@ public class NoisiumServerPlayerChunkLoader {
 		// TODO: Send chunks to player on join
 		PlayerEvent.PLAYER_JOIN.register(player -> {
 			previousPlayerPositions.put(player.getId(), player.getPos());
-			player.networkHandler.sendPacket(new ChunkLoadDistanceS2CPacket(9));
+			player.networkHandler.sendPacket(new ChunkLoadDistanceS2CPacket(14));
 		});
 		PlayerEvent.PLAYER_QUIT.register(player -> previousPlayerPositions.remove(player.getId()));
 		TickEvent.ServerLevelTick.SERVER_LEVEL_POST.register(
@@ -32,6 +32,7 @@ public class NoisiumServerPlayerChunkLoader {
 						instance, ((NoisiumServerWorldExtension) instance).noisium$getServerWorldChunkManager()::getChunksInRadius));
 	}
 
+	// TODO: Enable ticking/update chunk tracking in ServerEntityManager
 	@SuppressWarnings("ForLoopReplaceableByForEach")
 	private void tick(@NotNull ServerWorld serverWorld, @NotNull BiFunction<ChunkPos, Integer, Map<ChunkPos, WorldChunk>> worldChunkSupplier) {
 		var players = serverWorld.getPlayers();
@@ -44,7 +45,7 @@ public class NoisiumServerPlayerChunkLoader {
 			var playerBlockPos = player.getBlockPos();
 			if (!playerBlockPos.isWithinDistance(previousPlayerPositions.get(player.getId()), 16d)) {
 				var chunkPos = new ChunkPos(playerBlockPos);
-				var worldChunks = worldChunkSupplier.apply(chunkPos, 9);
+				var worldChunks = worldChunkSupplier.apply(chunkPos, 14);
 
 				player.networkHandler.sendPacket(
 						new ChunkRenderDistanceCenterS2CPacket(ChunkSectionPos.getSectionCoord(playerBlockPos.getX()),

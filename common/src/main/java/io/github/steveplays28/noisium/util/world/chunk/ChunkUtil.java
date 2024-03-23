@@ -1,11 +1,16 @@
 package io.github.steveplays28.noisium.util.world.chunk;
 
 import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
+import net.minecraft.network.packet.s2c.play.LightUpdateS2CPacket;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.world.chunk.light.LightingProvider;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.BitSet;
+import java.util.List;
 import java.util.Map;
 
 public class ChunkUtil {
@@ -27,6 +32,13 @@ public class ChunkUtil {
 		// TODO: Send a whole batch of chunks to the player at once to save on network traffic
 		for (var worldChunk : worldChunks.values()) {
 			sendWorldChunkToPlayer(serverWorld, worldChunk);
+		}
+	}
+
+	@SuppressWarnings("ForLoopReplaceableByForEach")
+	public static void sendLightUpdateToPlayers(@NotNull List<ServerPlayerEntity> players, LightingProvider lightingProvider, ChunkPos chunkPos, BitSet skyLightBits, BitSet blockLightBits) {
+		for (int i = 0; i < players.size(); i++) {
+			players.get(i).networkHandler.sendPacket(new LightUpdateS2CPacket(chunkPos, lightingProvider, skyLightBits, blockLightBits));
 		}
 	}
 }
