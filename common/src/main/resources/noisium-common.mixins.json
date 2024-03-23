@@ -15,7 +15,6 @@
     "world.WorldMixin"
   ],
   "client": [
-    "client.gui.hud.ChunkBuilderBuiltChunkMixin",
     "client.gui.hud.DebugHudMixin"
   ],
   "injectors": {
