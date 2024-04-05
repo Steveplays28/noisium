@@ -72,8 +72,8 @@ jobs:
           name: ${{ steps.mod_version.outputs.value }} (${{ steps.supported_minecraft_version.outputs.value }})
           github-tag: v${{ steps.mod_version.outputs.value }}+mc${{ steps.supported_minecraft_version.outputs.value }}
           files: |
-            build/libs/!(*-@(dev|sources|javadoc)).jar
-            build/libs/*-@(dev|sources|javadoc).jar
+            build/libs/!(*-@(sources|dev-shadow|javadoc)).jar
+            **/build/libs/*-@(sources|dev-shadow|javadoc).jar
           version-type: release
           modrinth-featured: false
           changelog-file: CHANGELOG_LATEST.md
