@@ -54,6 +54,7 @@ processResources {
                 "mod_name": rootProject.mod_name,
                 "mod_description": rootProject.mod_description,
                 "mod_license": rootProject.mod_license,
+                "curseforge_project_id": rootProject.curseforge_project_id,
                 "modrinth_project_id": rootProject.modrinth_project_id,
                 "fabric_loader_version": rootProject.fabric_loader_version,
                 "supported_minecraft_version": rootProject.supported_minecraft_version
