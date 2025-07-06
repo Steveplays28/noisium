@@ -17,6 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Set;
 
+// TODO: Re-add compatibility for Lithium for Minecraft >=1.21 in a separate source set
+//  Also move this class into a separate Minceraft <1.21 source set
 @Mixin(NoiseBasedChunkGenerator.class)
 public abstract class LithiumNoiseBasedChunkGeneratorMixin extends ChunkGenerator {
 	public LithiumNoiseBasedChunkGeneratorMixin(BiomeSource biomeSource) {
@@ -36,7 +38,7 @@ public abstract class LithiumNoiseBasedChunkGeneratorMixin extends ChunkGenerato
 		return blockState;
 	}
 
-	@Inject(method = "method_38328", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunkSection;release()V"))
+	@Inject(method = "/lambda\\$fillFromNoise\\$\\d+/", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunkSection;release()V"))
 	private static void noisium$recalculateBlockCounts(Set<LevelChunkSection> chunkSections, @NotNull ChunkAccess chunk, @Nullable Throwable throwable, @NotNull CallbackInfo ci,
 			@Local @NotNull LevelChunkSection chunkSection) {
 		// Calculate the block state counts on every chunk section to add Lithium compatibility
