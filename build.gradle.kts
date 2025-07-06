@@ -126,6 +126,10 @@ cloche {
             modRuntimeOnly("net.fabricmc.fabric-api:fabric-api:${fabric_api_version}")
             val mod_menu_version: String = "7.2.2"
             modRuntimeOnly("com.terraformersmc:modmenu:${mod_menu_version}")
+            val lithium_version: String = "mc1.20.1-0.11.3-fabric"
+            modRuntimeOnly("maven.modrinth:lithium:${lithium_version}")
+            val c2me_version: String = "0.2.0+alpha.11.13+1.20.1"
+            modRuntimeOnly("maven.modrinth:c2me-fabric:${c2me_version}")
         }
     }
 
