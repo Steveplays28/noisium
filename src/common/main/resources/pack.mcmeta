@@ -1,0 +1,10 @@
+{
+  "pack": {
+    "description": "Optimises worldgen performance for a better gameplay experience, by Steveplays28.",
+    "pack_format": 15,
+    "supported_formats": {
+      "min_inclusive": 15,
+      "max_inclusive": 64
+    }
+  }
+}

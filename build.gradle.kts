@@ -1,5 +1,7 @@
 import earth.terrarium.cloche.api.target.FabricTarget
 import earth.terrarium.cloche.api.target.ForgeTarget
+import earth.terrarium.cloche.api.target.NeoforgeTarget
+import earth.terrarium.cloche.api.metadata.Metadata
 
 plugins {
 	id("earth.terrarium.cloche")
@@ -25,7 +27,6 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             groupId = mod_group
-            artifactId = "${mod_group}.${mod_id}"
             version = mod_version
 
             from(components["java"])
@@ -46,8 +47,6 @@ publishing {
 }
 
 repositories {
-    // Workaround for terrarium-earth/cloche #40 ([Bug]: Windows requires mavencentral() before librariesMinecraft())
-    // https://github.com/terrarium-earth/cloche/issues/40
     mavenCentral()
 
     cloche {
@@ -55,6 +54,7 @@ repositories {
         librariesMinecraft()
         mavenParchment()
         mavenFabric()
+        mavenNeoforgedMeta()
         mavenNeoforged()
         mavenForge()
     }
@@ -70,20 +70,30 @@ cloche {
         name = mod_name
         val mod_description: String by project
         description = mod_description
+        icon = "assets/${mod_id}/icon.png"
         val mod_license: String by project
         license = mod_license
         val mod_authors: String by project
         mod_authors.split(',').forEach(::author)
-        version = mod_version
-        // TODO: Add source and issues links
+        val mod_url: String by project
+        url = mod_url
+        val mod_sources: String by project
+        sources = mod_sources
+        val mod_issues: String by project
+        issues = mod_issues
+        suggest("c2me", "*")
+        markIncompatible("biox", "*")
+        markIncompatible("performant", "*")
     }
 
     mappings {
         official()
     }
 
-    val fabricCommon = common("fabric:common") {}
+    val curseforge_project_id: String by project
+    val modrinth_project_id: String by project
 
+    val fabricCommon = common("fabric:common") {}
     targets.withType<FabricTarget> {
         dependsOn(fabricCommon)
 
@@ -92,18 +102,39 @@ cloche {
 
         metadata {
             entrypoint("main", "io.github.steveplays28.noisium.fabric.NoisiumFabric")
+            custom("modmenu" to mapOf("links" to mapOf("modmenu.discord" to "https://discord.gg/KbWxgGg", "modmenu.modrinth" to "https://modrinth.com/mod/noisium", "modmenu.curseforge" to "https://www.curseforge.com/minecraft/mc-mods/noisium")))
+            custom("mc-publish" to mapOf("loaders" to listOf("fabric", "quilt"), "curseforge" to curseforge_project_id, "modrinth" to modrinth_project_id))
+            suggest("modmenu", "*", environment = Metadata.Environment.CLIENT)
         }
 
         includedClient()
     }
 
+    val forgeCommon = common("forge:common") {}
     targets.withType<ForgeTarget> {
+        dependsOn(forgeCommon)
+
+        metadata {
+            custom("mc-publish" to mapOf("loaders" to listOf("forge", "neoforge"), "curseforge" to curseforge_project_id, "modrinth" to modrinth_project_id))
+        }
+
         dependencies {
             val mixin_extras_version: String by project
-            val mixin_extras = module("io.github.llamalad7:mixinextras-forge:${mixin_extras_version}")
-            annotationProcessor(mixin_extras)
-            implementation(mixin_extras)
-            include(mixin_extras)
+            val mixin_extras_common = module("io.github.llamalad7:mixinextras-common:${mixin_extras_version}")
+            val mixin_extras_forge = module("io.github.llamalad7:mixinextras-forge:${mixin_extras_version}")
+            compileOnly(mixin_extras_common)
+            annotationProcessor(mixin_extras_common)
+            implementation(mixin_extras_forge)
+            include(mixin_extras_forge)
+        }
+    }
+
+    val neoForgeCommon = common("neoforge:common") {}
+    targets.withType<NeoforgeTarget> {
+        dependsOn(neoForgeCommon)
+
+        metadata {
+            custom("mc-publish" to mapOf("curseforge" to curseforge_project_id, "modrinth" to modrinth_project_id))
         }
     }
 
@@ -188,6 +219,14 @@ cloche {
         minecraftVersion.set("1.21.5")
     }
 
+    fabric("fabric:1.21.6") {
+        minecraftVersion.set("1.21.6")
+    }
+
+    fabric("fabric:1.21.7") {
+        minecraftVersion.set("1.21.7")
+    }
+
     forge("forge:1.20") {
         minecraftVersion.set("1.20")
         loaderVersion.set("46.0.14")
@@ -213,28 +252,76 @@ cloche {
         loaderVersion.set("49.2.0")
     }
 
-    targets.all {
-        when(minecraftVersion.get()) {
-            "1.20.4" -> mappings { parchment("2024.04.14") }
-            "1.20.3" -> mappings { parchment("2023.12.31") }
-            "1.20.2" -> mappings { parchment("2023.12.10") }
-            "1.20.1" -> mappings { parchment("2023.09.03") }
-            "1.20" -> mappings { parchment("2023.09.03", "1.20.1") }
-        }
+    neoforge("neoforge:1.20.6") {
+        minecraftVersion.set("1.20.6")
+        loaderVersion.set("20.6.135")
+    }
+
+    neoforge("neoforge:1.21") {
+        minecraftVersion.set("1.21")
+        loaderVersion.set("21.0.167")
+    }
+
+    neoforge("neoforge:1.21.1") {
+        minecraftVersion.set("1.21.1")
+        loaderVersion.set("21.1.187")
+    }
+
+    neoforge("neoforge:1.21.2") {
+        minecraftVersion.set("1.21.2")
+        loaderVersion.set("21.2.1-beta")
+    }
+
+    neoforge("neoforge:1.21.3") {
+        minecraftVersion.set("1.21.3")
+        loaderVersion.set("21.3.81")
+    }
+
+    neoforge("neoforge:1.21.4") {
+        minecraftVersion.set("1.21.4")
+        loaderVersion.set("21.4.142")
+    }
+
+    neoforge("neoforge:1.21.5") {
+        minecraftVersion.set("1.21.5")
+        loaderVersion.set("21.5.82")
+    }
+
+    neoforge("neoforge:1.21.6") {
+        minecraftVersion.set("1.21.6")
+        loaderVersion.set("21.6.20-beta")
+    }
+
+    neoforge("neoforge:1.21.7") {
+        minecraftVersion.set("1.21.7")
+        loaderVersion.set("21.7.8-beta")
     }
 
     // This target is at the bottom instead of at the top, as a workaround for terrarium-earth/cloche #12. See also terrarium-earth/cloche #59.
     // #12: https://github.com/terrarium-earth/cloche/issues/12
     // #59: https://github.com/terrarium-earth/cloche/issues/59
     targets.all {
-        mixins.from(file("src/common/main/${mod_id}.mixins.json"))
-        accessWideners.from(file("src/common/main/${mod_id}.accesswidener"))
-
-        // TODO: Mark c2me as a suggestion and biox as breaking
-
         dependencies {
             implementation("org.jetbrains:annotations:26.0.2")
         }
+
+        when(minecraftVersion.get()) {
+            // TODO: Add Parchment mappings for Minecraft 1.21.7
+            "1.21.6" -> mappings { parchment("2025.06.29") }
+            "1.21.5" -> mappings { parchment("2025.06.15") }
+            "1.21.4" -> mappings { parchment("2025.03.23") }
+            "1.21.3" -> mappings { parchment("2024.12.07") }
+            "1.21.1" -> mappings { parchment("2024.11.17") }
+            "1.21" -> mappings { parchment("2024.11.10") }
+            "1.20.6" -> mappings { parchment("2024.06.16") }
+            "1.20.4" -> mappings { parchment("2024.04.14") }
+            "1.20.3" -> mappings { parchment("2023.12.31") }
+            "1.20.2" -> mappings { parchment("2023.12.10") }
+            "1.20.1" -> mappings { parchment("2023.09.03") }
+        }
+
+        mixins.from(file("src/common/main/${mod_id}.mixins.json"))
+        accessWideners.from(file("src/common/main/${mod_id}.accesswidener"))
 
         runs {
             client()
