@@ -29,12 +29,8 @@ public abstract class LithiumNoiseChunkGeneratorMixin extends ChunkGenerator {
 
 	@Redirect(method = "populateNoise(Lnet/minecraft/world/gen/chunk/Blender;Lnet/minecraft/world/gen/StructureAccessor;Lnet/minecraft/world/gen/noise/NoiseConfig;Lnet/minecraft/world/chunk/Chunk;II)Lnet/minecraft/world/chunk/Chunk;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/ChunkSection;setBlockState(IIILnet/minecraft/block/BlockState;Z)Lnet/minecraft/block/BlockState;"))
 	private BlockState noisium$populateNoiseWrapSetBlockStateOperation(@NotNull ChunkSection chunkSection, int chunkSectionBlockPosX, int chunkSectionBlockPosY, int chunkSectionBlockPosZ, @NotNull BlockState blockState, boolean lock) {
-		// Set the blockstate in the palette storage directly to improve performance
-		var blockStateId = chunkSection.blockStateContainer.data.palette.index(blockState);
-		chunkSection.blockStateContainer.data.storage().set(
-				chunkSection.blockStateContainer.paletteProvider.computeIndex(chunkSectionBlockPosX, chunkSectionBlockPosY,
-						chunkSectionBlockPosZ
-				), blockStateId);
+		// Set the blockstate directly using swapUnsafe for MC 1.21.9+ (similar to biome optimization)
+		chunkSection.blockStateContainer.swapUnsafe(chunkSectionBlockPosX, chunkSectionBlockPosY, chunkSectionBlockPosZ, blockState);
 
 		return blockState;
 	}

@@ -1,6 +1,9 @@
-![Noisium icon](docs/assets/icon/icon_128x128.png)
+![Noisium icon](https://raw.githubusercontent.com/coredex-source/noisium/24de632923c03864d65568a2cb5ce1e2cee0a304/docs/assets/icon/icon_128x128.png)
 
-# Noisium
+# Noisium Forked
+
+This mod is a fork of the orignal and now unmaintained mod [Noisium](https://github.com/Steveplays28/noisium).
+The fork intends to maintain compatibility with future Minecraft versions.
 
 Optimises worldgen performance for a better gameplay experience.
 
@@ -18,14 +21,14 @@ Noisium has full 1:1 parity with vanilla Minecraft world generation (world gener
 The performance difference is variable, between a few seconds to a few dozen seconds faster depending on the amount of chunks generated.  
 See the below Spark profiles for the differences in performance:
 
-- [Vanilla](docs/benchmarks/vanilla_minecraft_1_20_1.sparkprofile)
-- [With Noisium](docs/benchmarks/noisium_minecraft_1_20_1.sparkprofile)
+- [Vanilla](https://github.com/coredex-source/noisium/blob/1.21.9/docs/benchmarks/vanilla_minecraft_1_20_1.sparkprofile)
+- [With Noisium](https://github.com/coredex-source/noisium/blob/1.21.9/docs/benchmarks/noisium_minecraft_1_20_1.sparkprofile)
 
 ## Dependencies
 
 ### Required
 
-None.
+None. 
 
 ## Compatibility info
 
@@ -43,22 +46,11 @@ This includes (but is not limited to) C2ME, Lithium, Nvidium, and Sodium.
 
 ### Incompatibilities
 
-See the [issue tracker](https://github.com/Steveplays28/noisium/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Acompatibility) for
+See the [issue tracker](https://github.com/coredex-source/noisium/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Acompatibility) for
 a list of incompatibilities.
 
-## Download
-
-[![GitHub](https://github.com/intergrav/devins-badges/raw/2dc967fc44dc73850eee42c133a55c8ffc5e30cb/assets/cozy/available/github_vector.svg)](https://github.com/Steveplays28/noisium)
-[![Modrinth](https://github.com/intergrav/devins-badges/raw/2dc967fc44dc73850eee42c133a55c8ffc5e30cb/assets/cozy/available/modrinth_vector.svg)](https://modrinth.com/mod/noisium)
-[![CurseForge](https://github.com/intergrav/devins-badges/raw/2dc967fc44dc73850eee42c133a55c8ffc5e30cb/assets/cozy/available/curseforge_vector.svg)](https://www.curseforge.com/minecraft/mc-mods/noisium)
-
-![Fabric](https://github.com/intergrav/devins-badges/raw/2dc967fc44dc73850eee42c133a55c8ffc5e30cb/assets/compact/supported/fabric_vector.svg)
-![Quilt](https://github.com/intergrav/devins-badges/raw/2dc967fc44dc73850eee42c133a55c8ffc5e30cb/assets/compact/supported/quilt_vector.svg)
-![Forge](https://github.com/intergrav/devins-badges/raw/2dc967fc44dc73850eee42c133a55c8ffc5e30cb/assets/compact/supported/forge_vector.svg)
-![NeoForge](docs/assets/badges/compact/supported/neoforge_vector.svg)
-
 See the version info in the filename for the supported Minecraft versions.  
-Made for the Fabric, Quilt, Forge, and NeoForge modloaders.  
+Made for the Fabric, Quilt, and NeoForge modloaders.  
 Server-side.
 
 ## FAQ
@@ -74,10 +66,11 @@ Server-side.
 
 ## Attribution
 
+- Thank you to [Steveplays28](https://github.com/Steveplays28) for the orignal mod.
 - Thank you to [Builderb0y](https://modrinth.com/user/Builderb0y) for giving great starting points and helping with issues
 - Thank you to [ishland](https://github.com/ishland) for helping with C2ME compatibility and benchmarking performance
 - Thank you to [Uniter](https://github.com/Uniter343) and [raccoonman2](https://github.com/racoonman2) for benchmarking performance
 
 ## License
 
-This project is licensed under LGPLv3, see [LICENSE](https://github.com/Steveplays28/noisium/blob/main/LICENSE).
+This project is licensed under LGPLv3, see [LICENSE](https://github.com/coredex-source/noisium/blob/main/LICENSE).

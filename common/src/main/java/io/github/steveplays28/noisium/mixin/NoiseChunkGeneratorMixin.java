@@ -36,12 +36,8 @@ public abstract class NoiseChunkGeneratorMixin extends ChunkGenerator {
 			chunkSection.randomTickableBlockCount += 1;
 		}
 
-		// Set the blockstate in the palette storage directly to improve performance
-		var blockStateId = chunkSection.blockStateContainer.data.palette.index(blockState);
-		chunkSection.blockStateContainer.data.storage().set(
-				chunkSection.blockStateContainer.paletteProvider.computeIndex(chunkSectionBlockPosX, chunkSectionBlockPosY,
-						chunkSectionBlockPosZ
-				), blockStateId);
+		// Set the blockstate directly using swapUnsafe for MC 1.21.9+ (similar to biome optimization)
+		chunkSection.blockStateContainer.swapUnsafe(chunkSectionBlockPosX, chunkSectionBlockPosY, chunkSectionBlockPosZ, blockState);
 
 		return blockState;
 	}

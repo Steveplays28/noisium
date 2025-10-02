@@ -7,7 +7,7 @@ issueTrackerURL = "https://github.com/Steveplays28/${mod_id}/issues"
 modId = "${mod_id}"
 version = "${version}"
 displayName = "${mod_name}"
-authors = "Steveplays28"
+authors = "coredex-source, Steveplays28"
 description = '''
 ${mod_description}
 '''
