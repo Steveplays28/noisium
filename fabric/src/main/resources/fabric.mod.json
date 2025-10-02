@@ -5,7 +5,7 @@
   "name": "${mod_name}",
   "description": "${mod_description}",
   "authors": [
-    "Steveplays28"
+    "coredex-source, Steveplays28"
   ],
   "contact": {
     "homepage": "https://modrinth.com/mod/${mod_id}",
